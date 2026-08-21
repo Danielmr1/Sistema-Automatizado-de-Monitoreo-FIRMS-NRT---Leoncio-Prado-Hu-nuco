@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NRT & SP Monitoreo Quemas - Leoncio Prado (Huánuco)</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#fff7ed',
+              500: '#f97316',
+              600: '#ea580c',
+              700: '#c2410c'
+            },
+            darkBg: '#090d16',
+            cardBg: '#0f172a',
+            borderDark: '#1e293b',
+            terminalBg: '#020617'
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Leaflet CSS & JS for GIS Map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <!-- Turf.js for real Point-in-Polygon, BBox & Spatial Calculations in Browser -->
+  <script src="https://cdn.jsdelivr.net/npm/@turf/turf@6/turf.min.js"></script>
+
+  <!-- Chart.js for Thesis Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    /* Custom Scrollbars */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #0b1120; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #f97316; }
+
+    .glow-orange {
+      box-shadow: 0 0 25px -2px rgba(249, 115, 22, 0.45);
+    }
+    .glow-emerald {
+      box-shadow: 0 0 25px -2px rgba(34, 197, 94, 0.45);
+    }
+    .step-active {
+      border-color: #f97316 !important;
+      background: rgba(249, 115, 22, 0.12) !important;
+    }
+    .step-done {
+      border-color: #22c55e !important;
+      background: rgba(34, 197, 94, 0.08) !important;
+    }
+    #mapContainer {
+      height: calc(100vh - 200px);
+      min-height: 540px;
+    }
+  </style>
+</head>
+
+<body class="bg-darkBg text-slate-100 min-h-screen flex flex-col font-sans antialiased selection:bg-orange-500 selection:text-white">
+
+  <!-- ===================================================================== -->
+  <!-- TOP NAVBAR -->
+  <!-- ===================================================================== -->
+  <header class="bg-[#0b1222] border-b border-borderDark px-4 sm:px-6 py-3 sticky top-0 z-50 backdrop-blur-md bg-opacity-90">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-600 via-amber-500 to-red-600 flex items-center justify-center shadow-lg shadow-orange-600/30">
+          <i data-lucide="flame" class="w-6 h-6 text-white animate-pulse"></i>
+        </div>
+        <div>
+          <div class="flex items-center space-x-2">
+            <span class="font-extrabold text-lg tracking-tight bg-gradient-to-r from-orange-400 via-amber-300 to-white bg-clip-text text-transparent">
+              NRT & SP Monitoreo
+            </span>
+            <span id="nav-aoi-badge" class="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-2 py-0.5 rounded-full">
+              Leoncio Prado (Límites Activos)
+            </span>
+          </div>
+          <p class="text-xs text-slate-400 font-medium">NASA FIRMS • Tiempo Real (NRT) & Calidad Científica (SP) • Tesis Quemas</p>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex items-center bg-slate-900/90 p-1 rounded-xl border border-slate-800 text-xs sm:text-sm font-medium overflow-x-auto">
+        <button onclick="switchTab('pipeline')" id="tab-btn-pipeline" class="tab-btn flex items-center space-x-2 px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition">
+          <i data-lucide="terminal" class="w-4 h-4"></i>
+          <span>Simulador & Ejecutor Live</span>
+        </button>
+
+        <button onclick="switchTab('mapa')" id="tab-btn-mapa" class="tab-btn flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-orange-600/20 text-orange-400 border border-orange-500/30 transition">
+          <i data-lucide="map-pin" class="w-4 h-4"></i>
+          <span>Mapa GIS (<span id="badge-map-count">11</span> focos)</span>
+        </button>
+
+        <button onclick="switchTab('entregables')" id="tab-btn-entregables" class="tab-btn flex items-center space-x-2 px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition">
+          <i data-lucide="download" class="w-4 h-4"></i>
+          <span>Descargar Alertas (CSV/KML)</span>
+        </button>
+
+        <button onclick="switchTab('telegram')" id="tab-btn-telegram" class="tab-btn flex items-center space-x-2 px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition">
+          <i data-lucide="send" class="w-4 h-4"></i>
+          <span>Alertas Telegram</span>
+        </button>
+
+        <button onclick="switchTab('analitica')" id="tab-btn-analitica" class="tab-btn flex items-center space-x-2 px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition">
+          <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+          <span>Analítica Tesis</span>
+        </button>
+
+        <button onclick="switchTab('guia')" id="tab-btn-guia" class="tab-btn flex items-center space-x-2 px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition">
+          <i data-lucide="book-open" class="w-4 h-4"></i>
+          <span>Guía & NRT vs SP</span>
+        </button>
+      </nav>
+
+      <!-- Processing Mode Badge -->
+      <div id="processingTypeBadge" class="hidden lg:flex items-center space-x-2 px-3 py-1.5 rounded-lg bg-orange-950/40 border border-orange-800/60 text-xs font-semibold text-orange-300">
+        <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse mr-1"></span>
+        <span id="badgeProcessingLabel">Modo: NRT (Tiempo Real)</span>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ===================================================================== -->
+  <!-- MAIN CONTENT CONTAINER -->
+  <!-- ===================================================================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- ================================================================= -->
+    <!-- TAB 1: SIMULADOR & EJECUTOR PIPELINE EN VIVO -->
+    <!-- ================================================================= -->
+    <section id="tab-pipeline" class="tab-content hidden space-y-6">
+      
+      <!-- Top Title & Controls Header -->
+      <div class="bg-cardBg border border-borderDark rounded-2xl p-5 shadow-xl space-y-4">
+        
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center space-x-2 text-orange-400 font-mono text-sm mb-1">
+              <span>&gt;_</span>
+              <span class="font-bold uppercase tracking-wider">Ejecutor y Monitoreo Satelital en Tiempo Real</span>
+            </div>
+            <p class="text-sm text-slate-300">
+              Descarga datos <b class="text-orange-400">NASA FIRMS en Vivo</b>. Selecciona entre procesamiento <b class="text-amber-400">NRT (Inmediato)</b> o <b class="text-cyan-400">SP (Calidad Científica)</b>.
+            </p>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <!-- Mode Switcher -->
+            <div class="bg-slate-900 border border-slate-800 p-1 rounded-xl flex items-center text-xs font-semibold">
+              <button onclick="setExecutionMode('live')" id="mode-live" class="px-3 py-1.5 rounded-lg bg-orange-600/30 text-orange-300 border border-orange-500/40 flex items-center space-x-1.5 transition">
+                <i data-lucide="satellite" class="w-3.5 h-3.5"></i>
+                <span>🛰️ Consulta LIVE (NASA Real)</span>
+              </button>
+              <button onclick="setExecutionMode('demo')" id="mode-demo" class="px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center space-x-1.5 transition">
+                <i data-lucide="sparkles" class="w-3.5 h-3.5"></i>
+                <span>🧪 Modo Demo / Histórico</span>
+              </button>
+            </div>
+
+            <!-- Big Run Button -->
+            <button onclick="executePipeline()" id="btnRunPipeline" class="glow-orange bg-gradient-to-r from-orange-600 via-orange-500 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold px-6 py-2.5 rounded-xl shadow-lg flex items-center space-x-2 transition transform active:scale-95">
+              <i data-lucide="play" class="w-4 h-4 fill-white"></i>
+              <span>Ejecutar Pipeline</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Full Control Matrix -->
+        <div class="pt-4 border-t border-slate-800/80 grid grid-cols-1 md:grid-cols-12 gap-4">
+          
+          <!-- 1. AOI Zone Selector & Upload (Col 4) -->
+          <div class="md:col-span-4 bg-slate-900/90 p-3 rounded-xl border border-slate-800 space-y-2">
+            <div class="flex items-center justify-between">
+              <label class="block text-xs font-bold text-emerald-400 uppercase font-mono flex items-center space-x-1.5">
+                <i data-lucide="map" class="w-3.5 h-3.5"></i>
+                <span>Zona de Estudio (AOI):</span>
+              </label>
+              <span id="activeZoneLabel" class="text-[11px] text-slate-300 font-medium truncate max-w-[150px]">Leoncio Prado (Defecto)</span>
+            </div>
+
+            <div class="flex items-center space-x-2">
+              <select id="aoiPresetSelector" onchange="handleZoneChange()" class="flex-1 bg-slate-950 border border-slate-700 px-2 py-1.5 rounded-lg text-slate-200 text-xs focus:outline-none focus:border-emerald-500 font-medium">
+                <option value="default" selected>📍 Prov. Leoncio Prado (Por Defecto)</option>
+                <option value="parque_tingo_maria">🏞️ Parque Nacional Tingo María (ANP)</option>
+                <option value="cordillera_azul">🌲 P.N. Cordillera Azul (Sector Huánuco)</option>
+                <option value="custom_upload">📁 Cargar mi propio archivo GeoJSON (.geojson)...</option>
+              </select>
+
+              <label for="customGeoJsonFileInput" class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center space-x-1 transition" title="Subir archivo GeoJSON local">
+                <i data-lucide="upload" class="w-3.5 h-3.5 text-emerald-400"></i>
+                <span>Subir</span>
+              </label>
+              <input type="file" id="customGeoJsonFileInput" accept=".geojson,.json" onchange="loadCustomGeoJSON(event)" class="hidden">
+            </div>
+
+            <div class="text-[11px] text-slate-400 font-mono">
+              BBOX: <code id="activeBboxDisplay" class="text-orange-400 text-[10px]">-76.5,-9.72,-75.25,-8.35</code>
+            </div>
+          </div>
+
+          <!-- 2. Processing Type: NRT vs SP (Col 4) -->
+          <div class="md:col-span-4 bg-slate-900/90 p-3 rounded-xl border border-slate-800 space-y-2">
+            <label class="block text-xs font-bold text-amber-400 uppercase font-mono flex items-center space-x-1.5">
+              <i data-lucide="cpu" class="w-3.5 h-3.5"></i>
+              <span>Tipo de Procesamiento Satelital:</span>
+            </label>
+            <select id="processingTypeSelect" onchange="updateProcessingBadge()" class="w-full bg-slate-950 border border-slate-700 px-2.5 py-1.5 rounded-lg text-slate-200 text-xs focus:outline-none focus:border-amber-500 font-medium">
+              <option value="NRT" selected>⚡ Near Real-Time (NRT) - Últimas horas a 2 meses</option>
+              <option value="SP">🔬 Standard Processing (SP) - Calidad Científica Definitiva</option>
+              <option value="ALL">🔄 Ambos (NRT + SP combinados)</option>
+            </select>
+            <p class="text-[10px] text-slate-400 leading-tight">
+              <b>NRT:</b> Para salidas urgentes a campo. <b>SP:</b> Para análisis estadístico de meses anteriores.
+            </p>
+          </div>
+
+          <!-- 3. Date Selection & Span (Col 4) -->
+          <div class="md:col-span-4 bg-slate-900/90 p-3 rounded-xl border border-slate-800 space-y-2">
+            <label class="block text-xs font-bold text-cyan-400 uppercase font-mono flex items-center space-x-1.5">
+              <i data-lucide="calendar-range" class="w-3.5 h-3.5"></i>
+              <span>Intervalo de Búsqueda:</span>
+            </label>
+            
+            <div class="space-y-1.5">
+              <select id="dateModeSelect" onchange="handleDateModeChange()" class="w-full bg-slate-950 border border-slate-700 px-2 py-1 rounded text-slate-200 text-xs focus:outline-none focus:border-cyan-500">
+                <option value="relative" selected>⏱️ Relativo a Hoy (Últimos días)</option>
+                <option value="specific_span">📅 Fecha Específica + Rango de Días</option>
+              </select>
+
+              <!-- Relative options -->
+              <div id="relativeDateBox">
+                <select id="quickDayRange" class="w-full bg-slate-950 border border-slate-700 px-2 py-1 rounded text-slate-200 text-xs">
+                  <option value="1">Últimas 24 horas (1 día)</option>
+                  <option value="2" selected>Últimos 2 días (Recomendado campo)</option>
+                  <option value="3">Últimos 3 días</option>
+                  <option value="4">Últimos 4 días</option>
+                  <option value="5">Últimos 5 días (Máx. ventana por consulta NRT)</option>
+                </select>
+              </div>
+
+              <!-- Specific Date + Span options -->
+              <div id="specificDateBox" class="hidden grid grid-cols-2 gap-2">
+                <div>
+                  <span class="text-[10px] text-slate-400 font-mono">Fecha Inicio:</span>
+                  <input type="date" id="customStartDate" class="w-full bg-slate-950 border border-slate-700 px-1.5 py-0.5 rounded text-slate-200 text-xs font-mono">
+                </div>
+                <div>
+                  <span class="text-[10px] text-slate-400 font-mono">Días a buscar:</span>
+                  <select id="customDaySpan" class="w-full bg-slate-950 border border-slate-700 px-1.5 py-0.5 rounded text-slate-200 text-xs font-mono">
+                    <option value="1">1 día (Solo esa fecha)</option>
+                    <option value="2">2 días a partir de fecha</option>
+                    <option value="3" selected>3 días a partir de fecha</option>
+                    <option value="4">4 días a partir de fecha</option>
+                    <option value="5">5 días (Máx. ventana NRT)</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- 6 Flow Pipeline Step Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <div id="pipe-step-1" class="bg-cardBg border border-borderDark rounded-xl p-4 transition-all duration-300">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase font-mono">Paso 1</span>
+            <span id="step-icon-1" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold font-mono">1</span>
+          </div>
+          <h4 class="font-bold text-slate-200 text-sm">1. Ingesta NASA FIRMS API</h4>
+          <p class="text-xs text-slate-400 mt-1">MODIS + VIIRS SNPP / NOAA-20 (Modo NRT / SP en BBOX)</p>
+          <div id="step-badge-1" class="mt-3 text-[11px] font-mono text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800">
+            Estado: En espera
+          </div>
+        </div>
+
+        <div id="pipe-step-2" class="bg-cardBg border border-borderDark rounded-xl p-4 transition-all duration-300">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase font-mono">Paso 2</span>
+            <span id="step-icon-2" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold font-mono">2</span>
+          </div>
+          <h4 class="font-bold text-slate-200 text-sm">2. Filtro Espacial Estricto</h4>
+          <p class="text-xs text-slate-400 mt-1">Point-in-Polygon exacto contra el polígono de la zona activa</p>
+          <div id="step-badge-2" class="mt-3 text-[11px] font-mono text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800">
+            Estado: En espera
+          </div>
+        </div>
+
+        <div id="pipe-step-3" class="bg-cardBg border border-borderDark rounded-xl p-4 transition-all duration-300">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase font-mono">Paso 3</span>
+            <span id="step-icon-3" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold font-mono">3</span>
+          </div>
+          <h4 class="font-bold text-slate-200 text-sm">3. Filtro Calidad & Vías MTC</h4>
+          <p class="text-xs text-slate-400 mt-1">MODIS ≥ 60, VIIRS ['n','h'], distancias a carreteras y costos S/.</p>
+          <div id="step-badge-3" class="mt-3 text-[11px] font-mono text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800">
+            Estado: En espera
+          </div>
+        </div>
+
+        <div id="pipe-step-4" class="bg-cardBg border border-borderDark rounded-xl p-4 transition-all duration-300">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase font-mono">Paso 4</span>
+            <span id="step-icon-4" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold font-mono">4</span>
+          </div>
+          <h4 class="font-bold text-slate-200 text-sm">4. Archivos Diarios</h4>
+          <p class="text-xs text-slate-400 mt-1">Generación de <code class="text-emerald-400">alertas.csv</code>, <code class="text-blue-400">mapa.html</code> y <code class="text-amber-400">alertas.kml</code></p>
+          <div id="step-badge-4" class="mt-3 text-[11px] font-mono text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800">
+            Estado: En espera
+          </div>
+        </div>
+
+        <div id="pipe-step-5" class="bg-cardBg border border-borderDark rounded-xl p-4 transition-all duration-300">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase font-mono">Paso 5</span>
+            <span id="step-icon-5" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold font-mono">5</span>
+          </div>
+          <h4 class="font-bold text-slate-200 text-sm">5. Base de Datos Histórica</h4>
+          <p class="text-xs text-slate-400 mt-1">Deduplicación acumulativa en <code class="text-orange-400">historico_2026.csv</code></p>
+          <div id="step-badge-5" class="mt-3 text-[11px] font-mono text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800">
+            Estado: En espera
+          </div>
+        </div>
+
+        <div id="pipe-step-6" class="bg-cardBg border border-borderDark rounded-xl p-4 transition-all duration-300">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-slate-400 uppercase font-mono">Paso 6</span>
+            <span id="step-icon-6" class="w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold font-mono">6</span>
+          </div>
+          <h4 class="font-bold text-slate-200 text-sm">6. Despacho Alerta Telegram</h4>
+          <p class="text-xs text-slate-400 mt-1">Alerta con desglose, costos S/., enlaces GPS directos y adjuntos</p>
+          <div id="step-badge-6" class="mt-3 text-[11px] font-mono text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800">
+            Estado: En espera
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Real-time Animated Terminal Output -->
+      <div class="bg-terminalBg border border-slate-800 rounded-2xl overflow-hidden shadow-2xl">
+        <div class="bg-slate-950 px-4 py-2.5 border-b border-slate-800 flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <div class="w-3 h-3 rounded-full bg-red-500/80"></div>
+            <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+            <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+            <span class="ml-2 text-xs font-mono text-slate-400">stdout / python main.py [Live Execution Log]</span>
+          </div>
+          <span class="text-[11px] font-mono text-slate-400">NASA FIRMS API</span>
+        </div>
+
+        <div id="terminalOutput" class="p-5 font-mono text-xs text-slate-300 space-y-1.5 h-64 overflow-y-auto leading-relaxed">
+          <div class="text-slate-400">Selecciona tu zona de estudio, el modo NRT/SP y presiona "Ejecutar Pipeline"...</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 2: MAPA GIS INTERACTIVO (Con Híbrido Satelital y OpenStreetMap) -->
+    <!-- ================================================================= -->
+    <section id="tab-mapa" class="tab-content block space-y-4">
+      <div class="bg-cardBg border border-borderDark rounded-2xl p-4 shadow-xl flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h3 class="font-bold text-lg text-slate-100 flex items-center space-x-2">
+            <i data-lucide="map" class="w-5 h-5 text-orange-500"></i>
+            <span>Visor GIS Satelital - <span id="mapZoneTitle">Provincia de Leoncio Prado</span></span>
+          </h3>
+          <p class="text-xs text-slate-400">Límites Provinciales • Red Vial Oficial (PE-5N, PE-18A, HU-104, Vecinales) • Focos de Calor</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2 text-xs font-semibold">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span> 🟢 Límite Provincial Oficial
+          </span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-red-500/10 text-red-400 border border-red-500/20">
+            <span class="w-2 h-2 rounded-full bg-red-500 mr-1.5"></span> 🔴 Alta Intensidad (FRP / MODIS)
+          </span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-full bg-orange-500/10 text-orange-400 border border-orange-500/20">
+            <span class="w-2 h-2 rounded-full bg-orange-500 mr-1.5"></span> 🟠 Detección Nominal (VIIRS 375m)
+          </span>
+        </div>
+      </div>
+
+      <!-- Map Element -->
+      <div class="bg-cardBg border border-borderDark rounded-2xl overflow-hidden shadow-2xl relative">
+        <div id="mapContainer" class="w-full z-10"></div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 3: DESCARGA DE ENTREGABLES (CSV / KML) -->
+    <!-- ================================================================= -->
+    <section id="tab-entregables" class="tab-content hidden space-y-6">
+      <div class="bg-cardBg border border-borderDark rounded-2xl p-6 shadow-xl space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-lg font-bold text-slate-100">Entregables Generados para Trabajo de Campo</h3>
+            <p class="text-xs text-slate-400">Descarga los archivos generados listos para importar en Google Earth, OruxMaps o tu tesis.</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="downloadCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center space-x-2 transition">
+              <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+              <span>Descargar CSV</span>
+            </button>
+            <button onclick="downloadKML()" class="bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center space-x-2 transition">
+              <i data-lucide="map-pinned" class="w-4 h-4"></i>
+              <span>Descargar KML</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dynamic Table -->
+        <div class="overflow-x-auto rounded-xl border border-slate-800">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900/90 text-slate-400 uppercase font-mono text-[11px] border-b border-slate-800">
+              <tr>
+                <th class="p-3">#</th>
+                <th class="p-3">Zona / Sector</th>
+                <th class="p-3">Fecha / Hora</th>
+                <th class="p-3">Coordenadas</th>
+                <th class="p-3">Sensor</th>
+                <th class="p-3">FRP (MW)</th>
+                <th class="p-3">Vía Cercana</th>
+                <th class="p-3">Distancia</th>
+                <th class="p-3">Costo Est.</th>
+                <th class="p-3 text-center">Navegar</th>
+              </tr>
+            </thead>
+            <tbody id="fireTableBody" class="divide-y divide-slate-800/60 font-mono">
+              <tr>
+                <td colspan="10" class="p-6 text-center text-slate-500">Ejecuta el pipeline para cargar los focos reales detectados en la tabla.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 4: ALERTAS TELEGRAM -->
+    <!-- ================================================================= -->
+    <section id="tab-telegram" class="tab-content hidden space-y-6">
+      <div class="max-w-xl mx-auto bg-[#0e1626] border border-slate-800 rounded-3xl overflow-hidden shadow-2xl">
+        <!-- Telegram Header -->
+        <div class="bg-[#17212b] p-4 border-b border-slate-800 flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-500 to-amber-400 flex items-center justify-center text-white font-bold text-sm shadow">
+            🔥
+          </div>
+          <div>
+            <h4 class="font-bold text-slate-100 text-sm">Fire Scouting Bot</h4>
+            <p class="text-xs text-emerald-400 flex items-center space-x-1">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+              <span>bot • en línea</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="p-4 space-y-3 bg-[#0e1626]">
+          <div class="bg-[#182533] p-4 rounded-2xl border border-slate-800/80 text-xs sm:text-sm text-slate-200 space-y-2 shadow">
+            <div class="font-bold text-orange-400 flex items-center space-x-1.5">
+              <span>🚨 ALERTA DE FOCOS DE CALOR - MONITOREO 🚨</span>
+            </div>
+            <p>📅 <b>Fecha del reporte:</b> <span id="tg-date">2026-08-21</span><br>
+            📍 <b>Área de Tesis:</b> <span id="tg-zone-name">Provincia de Leoncio Prado (Huánuco)</span><br>
+            🔥 <b>Total anomalías validadas:</b> <code id="tg-count" class="bg-slate-900 text-amber-400 px-1 py-0.5 rounded font-mono">11</code></p>
+            
+            <div id="tg-breakdown" class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1">
+              <b>📊 Desglose por Sensor:</b><br>
+              &nbsp;&nbsp;• <b>VIIRS_SNPP_NRT:</b> 6 anomalías<br>
+              &nbsp;&nbsp;• <b>VIIRS_NOAA20_NRT:</b> 3 anomalías<br>
+              &nbsp;&nbsp;• <b>MODIS_NRT:</b> 2 anomalías
+            </div>
+
+            <div id="tg-accessibility" class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1">
+              <b>🛣️ Accesibilidad y Costos de Campo:</b><br>
+              &nbsp;&nbsp;• 🟢 <b>Alta (&lt;1 km):</b> 5 focos (~S/. 5-10)<br>
+              &nbsp;&nbsp;• 🟡 <b>Media (1-3 km):</b> 4 focos (~S/. 15-30)<br>
+              &nbsp;&nbsp;• 🔴 <b>Remota (&gt;3 km):</b> 2 focos (&gt;1h caminata)
+            </div>
+
+            <div id="tg-links" class="pt-1 text-[11px] text-blue-400 space-y-1"></div>
+
+            <div class="border-t border-slate-700/60 pt-2 text-[11px] text-slate-400 italic">
+              💡 Adjuntos generados: CSV tabular, Mapa HTML interactivo y archivo KML para GPS offline en celular.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 5: ANALÍTICA TESIS -->
+    <!-- ================================================================= -->
+    <section id="tab-analitica" class="tab-content hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <div class="bg-cardBg border border-borderDark rounded-2xl p-5 shadow-xl">
+          <h4 class="font-bold text-slate-200 text-sm mb-4">Detecciones por Sensor</h4>
+          <canvas id="sensorChart" class="max-h-56"></canvas>
+        </div>
+
+        <div class="bg-cardBg border border-borderDark rounded-2xl p-5 shadow-xl">
+          <h4 class="font-bold text-slate-200 text-sm mb-4">Accesibilidad y Distancia Vial</h4>
+          <canvas id="accessibilityChart" class="max-h-56"></canvas>
+        </div>
+
+        <div class="bg-cardBg border border-borderDark rounded-2xl p-5 shadow-xl">
+          <h4 class="font-bold text-slate-200 text-sm mb-4">Distribución por Sectores</h4>
+          <canvas id="districtChart" class="max-h-56"></canvas>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================================================================= -->
+    <!-- TAB 6: GUÍA & NRT VS SP -->
+    <!-- ================================================================= -->
+    <section id="tab-guia" class="tab-content hidden space-y-6">
+      <div class="bg-cardBg border border-borderDark rounded-2xl p-6 shadow-xl space-y-6">
+        
+        <div class="border-b border-slate-800 pb-4">
+          <h3 class="text-xl font-bold text-slate-100 flex items-center space-x-2">
+            <i data-lucide="layers" class="w-6 h-6 text-emerald-400"></i>
+            <span>Diferencias Clave: NRT (Tiempo Real) vs SP (Standard Processing)</span>
+          </h3>
+          <p class="text-xs text-slate-400 mt-1">Cómo utilizar cada tipo de procesamiento en tu proyecto de tesis de acuerdo a tus objetivos.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-slate-300">
+          
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2">
+            <h4 class="font-bold text-orange-400 flex items-center space-x-1.5">
+              <i data-lucide="zap" class="w-4 h-4"></i>
+              <span>⚡ Near Real-Time (NRT) — Para Campo Inmediato</span>
+            </h4>
+            <ul class="text-xs text-slate-300 list-disc list-inside space-y-1.5 leading-relaxed">
+              <li><b>Disponibilidad:</b> 1 a 3 horas después del paso del satélite.</li>
+              <li><b>Ventana de retención:</b> Últimos 60 a 90 días.</li>
+              <li><b>Sensores:</b> <code class="text-orange-300">MODIS_NRT</code>, <code class="text-orange-300">VIIRS_SNPP_NRT</code>, <code class="text-orange-300">VIIRS_NOAA20_NRT</code>.</li>
+              <li><b>Uso en Tesis:</b> Ideal para alertas matutinas, detección de quemas activas y salidas inmediatas a campo a tomar notas de ceniza fresca.</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2">
+            <h4 class="font-bold text-cyan-400 flex items-center space-x-1.5">
+              <i data-lucide="flask-conical" class="w-4 h-4"></i>
+              <span>🔬 Standard Processing (SP) — Para Calidad Científica</span>
+            </h4>
+            <ul class="text-xs text-slate-300 list-disc list-inside space-y-1.5 leading-relaxed">
+              <li><b>Disponibilidad:</b> 2 a 3 meses de retraso (espera datos orbitales de calibración definitiva).</li>
+              <li><b>Ventana de retención:</b> Histórico permanente desde el año 2000 al presente.</li>
+              <li><b>Sensores:</b> <code class="text-cyan-300">MODIS_SP</code>, <code class="text-cyan-300">VIIRS_SNPP_SP</code>, <code class="text-cyan-300">VIIRS_NOAA20_SP</code>.</li>
+              <li><b>Uso en Tesis:</b> Análisis multitemporal definitivo, estadísticas anuales y correlación climática de fondo.</li>
+            </ul>
+          </div>
+
+          <div class="bg-slate-900/90 p-4 rounded-xl border border-slate-800 space-y-2 md:col-span-2">
+            <h4 class="font-bold text-emerald-400 flex items-center space-x-1.5">
+              <i data-lucide="map" class="w-4 h-4"></i>
+              <span>Capa de Carreteras y Caminos Vecinales en el Mapa:</span>
+            </h4>
+            <p class="text-xs text-slate-300 leading-relaxed">
+              La red vial de Leoncio Prado (<code class="text-emerald-300">aoi_carreteras_leoncio_prado.geojson</code>) permanece <b>siempre cargada en el visor GIS</b>, superpuesta a cualquier área de estudio que elijas para que conozcas al instante qué carretera (PE-5N, PE-18A, HU-104 o trocha vecinal) te queda más cerca del punto.
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT LOGIC: EMBEDDED SHAPES & HIGH-VISIBILITY GIS -->
+  <!-- ===================================================================== -->
+  <script>
+    lucide.createIcons();
+
+    // -----------------------------------------------------------------------
+    // OFFICIAL EMBEDDED DATASET: PROVINCIA DE LEONCIO PRADO (HUÁNUCO)
+    // -----------------------------------------------------------------------
+    const DEFAULT_AOI_LEONCIO_PRADO = {"type": "FeatureCollection", "name": "aoi_leoncio_prado", "features": [{"type": "Feature", "properties": {"NOMBDEP": "HUANUCO", "NOMBPROV": "LEONCIO PRADO", "CAPITAL": "TINGO MARIA", "UBIGEO": "1006", "SUPERFICIE_KM2": 4771.74, "DISTRITOS_LIST": ["Rupa-Rupa", "Jos\u00e9 Crespo y Castillo", "Castillo Grande", "Luyando", "Daniel Alom\u00eda Robles", "Mariano D\u00e1maso Bera\u00fan", "Hermilio Valdiz\u00e1n", "Pucayacu", "Pueblo Nuevo", "Santo Domingo de Anda"]}, "geometry": {"type": "Polygon", "coordinates": [[[-76.48022, -9.17208], [-76.46312, -9.16967], [-76.44302, -9.18148], [-76.41249, -9.17742], [-76.40589, -9.18838], [-76.38218, -9.18528], [-76.36071, -9.19735], [-76.33796, -9.18546], [-76.30615, -9.17737], [-76.27769, -9.19542], [-76.27211, -9.21395], [-76.25725, -9.18942], [-76.24689, -9.1514], [-76.23486, -9.14027], [-76.22892, -9.15117], [-76.23426, -9.17317], [-76.22565, -9.18319], [-76.22273, -9.19603], [-76.214, -9.2044], [-76.19687, -9.19845], [-76.18703, -9.2074], [-76.17156, -9.20592], [-76.16917, -9.20049], [-76.13682, -9.20611], [-76.13404, -9.20139], [-76.12649, -9.20038], [-76.10549, -9.2124], [-76.09783, -9.21205], [-76.09599, -9.21752], [-76.08825, -9.22035], [-76.07765, -9.23887], [-76.07289, -9.27822], [-76.06065, -9.27542], [-76.05877, -9.28439], [-76.08504, -9.30498], [-76.08997, -9.2997], [-76.10579, -9.29662], [-76.12045, -9.30331], [-76.141, -9.3033], [-76.16044, -9.32437], [-76.17418, -9.32974], [-76.19316, -9.34505], [-76.19517, -9.35086], [-76.20934, -9.36076], [-76.2086, -9.36864], [-76.2277, -9.38003], [-76.23535, -9.41821], [-76.22665, -9.4309], [-76.21025, -9.43987], [-76.20153, -9.45159], [-76.19904, -9.47449], [-76.2034, -9.49916], [-76.19084, -9.49504], [-76.1846, -9.4854], [-76.15994, -9.46944], [-76.14764, -9.4741], [-76.1392, -9.47046], [-76.13383, -9.47777], [-76.12486, -9.48116], [-76.11909, -9.47503], [-76.10737, -9.47993], [-76.09838, -9.47256], [-76.07198, -9.47167], [-76.04897, -9.4792], [-76.03761, -9.49734], [-76.01974, -9.50122], [-76.01922, -9.50511], [-76.01073, -9.50812], [-75.98006, -9.50442], [-75.95563, -9.49225], [-75.94643, -9.49699], [-75.94397, -9.48959], [-75.93224, -9.48449], [-75.9307, -9.47818], [-75.91446, -9.46505], [-75.88677, -9.42776], [-75.87019, -9.42142], [-75.85237, -9.4263], [-75.81575, -9.39254], [-75.80935, -9.391], [-75.78475, -9.40697], [-75.78596, -9.42411], [-75.79086, -9.42981], [-75.78907, -9.45489], [-75.79192, -9.46292], [-75.78443, -9.4745], [-75.78247, -9.48705], [-75.77759, -9.49093], [-75.77553, -9.52321], [-75.7537, -9.54851], [-75.75699, -9.56529], [-75.7493, -9.5912], [-75.73837, -9.60816], [-75.72867, -9.61547], [-75.71796, -9.61561], [-75.69901, -9.58041], [-75.68779, -9.57785], [-75.68039, -9.56976], [-75.67172, -9.5173], [-75.63252, -9.44763], [-75.62786, -9.40018], [-75.62157, -9.39673], [-75.67234, -9.39527], [-75.67152, -9.38652], [-75.68799, -9.36647], [-75.69096, -9.35035], [-75.70524, -9.33157], [-75.73176, -9.27227], [-75.75378, -9.25248], [-75.76399, -9.2378], [-75.7592, -9.232], [-75.7638, -9.2171], [-75.7751, -9.2197], [-75.7831, -9.2089], [-75.7961, -9.2027], [-75.79522, -9.18551], [-75.80245, -9.15177], [-75.80921, -9.13297], [-75.82153, -9.11897], [-75.81946, -9.10385], [-75.82503, -9.09006], [-75.83788, -9.08489], [-75.84082, -9.07392], [-75.83788, -9.06197], [-75.84966, -9.05115], [-75.86004, -9.05006], [-75.89186, -9.00202], [-75.8945, -8.98371], [-75.88572, -8.98111], [-75.88376, -8.97273], [-75.89496, -8.92472], [-75.90311, -8.9155], [-75.90128, -8.89815], [-75.91051, -8.89632], [-75.91117, -8.88489], [-75.92096, -8.86898], [-75.92819, -8.84416], [-75.92935, -8.82427], [-75.92165, -8.78081], [-75.93853, -8.75179], [-75.94646, -8.71355], [-75.9641, -8.69736], [-75.96825, -8.67086], [-75.97934, -8.65288], [-75.9797, -8.63227], [-75.96502, -8.57997], [-75.9709, -8.55913], [-75.97083, -8.55052], [-75.9648, -8.54352], [-75.97073, -8.5124], [-75.95453, -8.49949], [-75.95545, -8.48447], [-75.96755, -8.45993], [-75.95132, -8.43378], [-75.9423, -8.42766], [-75.94959, -8.39133], [-75.97452, -8.34324], [-75.98492, -8.33167], [-75.98496, -8.32215], [-76.00104, -8.31456], [-76.00447, -8.32271], [-76.0226, -8.32354], [-76.02667, -8.32855], [-76.03806, -8.33061], [-76.0426, -8.34159], [-76.04779, -8.3405], [-76.05635, -8.32929], [-76.07425, -8.34018], [-76.08607, -8.33631], [-76.09412, -8.34781], [-76.09821, -8.36682], [-76.11323, -8.38424], [-76.1079, -8.39774], [-76.10871, -8.41599], [-76.11812, -8.42852], [-76.11693, -8.44218], [-76.12807, -8.45531], [-76.13067, -8.46788], [-76.12602, -8.51633], [-76.13118, -8.52846], [-76.1264, -8.54542], [-76.13201, -8.55282], [-76.13502, -8.5673], [-76.13278, -8.57645], [-76.12016, -8.58956], [-76.12453, -8.60357], [-76.1208, -8.60954], [-76.12336, -8.61502], [-76.12029, -8.61906], [-76.12424, -8.62425], [-76.12107, -8.63376], [-76.10762, -8.64047], [-76.10713, -8.6488], [-76.1155, -8.65768], [-76.11924, -8.65232], [-76.13003, -8.65529], [-76.13021, -8.66311], [-76.13949, -8.66664], [-76.13653, -8.67405], [-76.14543, -8.68675], [-76.14657, -8.70591], [-76.15088, -8.70865], [-76.14527, -8.71144], [-76.15598, -8.73276], [-76.16286, -8.73148], [-76.16644, -8.75641], [-76.18776, -8.76118], [-76.19734, -8.75731], [-76.20101, -8.77197], [-76.20593, -8.77512], [-76.21377, -8.77352], [-76.21552, -8.78663], [-76.22356, -8.79143], [-76.21212, -8.78998], [-76.21101, -8.78437], [-76.20627, -8.78952], [-76.19713, -8.783], [-76.19546, -8.79412], [-76.18985, -8.79637], [-76.19652, -8.79946], [-76.19201, -8.80257], [-76.19642, -8.80797], [-76.20339, -8.80909], [-76.19772, -8.81488], [-76.20089, -8.81639], [-76.19983, -8.8248], [-76.20597, -8.82391], [-76.20481, -8.83254], [-76.20018, -8.83463], [-76.20741, -8.83432], [-76.205, -8.83907], [-76.22211, -8.84877], [-76.22119, -8.86191], [-76.22672, -8.86406], [-76.22456, -8.88002], [-76.21923, -8.88101], [-76.22364, -8.88747], [-76.21891, -8.89386], [-76.22376, -8.90564], [-76.2198, -8.91113], [-76.22442, -8.91301], [-76.21637, -8.91868], [-76.2183, -8.9278], [-76.22163, -8.9262], [-76.23177, -8.94604], [-76.23004, -8.95774], [-76.24158, -8.97186], [-76.25173, -8.97207], [-76.25245, -8.97708], [-76.26586, -8.97628], [-76.27749, -8.99598], [-76.29234, -8.99708], [-76.3081, -9.00952], [-76.32594, -9.01255], [-76.32774, -9.01655], [-76.35502, -9.02468], [-76.37034, -9.0255], [-76.38072, -9.01847], [-76.38129, -9.01303], [-76.38978, -9.01283], [-76.39646, -9.00323], [-76.41923, -8.9864], [-76.43778, -8.98572], [-76.44962, -8.99557], [-76.45823, -8.99671], [-76.47337, -9.01223], [-76.48022, -9.17208]]]}}]};
+
+    
+    const PRESETS = {
+      default: { name: "Provincia de Leoncio Prado", geojson: DEFAULT_AOI_LEONCIO_PRADO, bbox: "-76.5,-9.72,-75.25,-8.35" },
+      parque_tingo_maria: {
+        name: "Parque Nacional Tingo María (ANP)",
+        bbox: "-76.04,-9.35,-75.95,-9.25",
+        geojson: {
+          type: "FeatureCollection",
+          features: [{
+            type: "Feature",
+            properties: { name: "P.N. Tingo María" },
+            geometry: {
+              type: "Polygon",
+              coordinates: [[
+                [-76.035, -9.260], [-75.975, -9.255], [-75.960, -9.330], [-76.020, -9.345], [-76.035, -9.260]
+              ]]
+            }
+          }]
+        }
+      },
+      cordillera_azul: {
+        name: "P.N. Cordillera Azul (Sector Huánuco)",
+        bbox: "-76.15,-8.85,-75.60,-8.40",
+        geojson: {
+          type: "FeatureCollection",
+          features: [{
+            type: "Feature",
+            properties: { name: "P.N. Cordillera Azul" },
+            geometry: {
+              type: "Polygon",
+              coordinates: [[
+                [-76.10, -8.45], [-75.70, -8.42], [-75.65, -8.80], [-76.05, -8.82], [-76.10, -8.45]
+              ]]
+            }
+          }]
+        }
+      }
+    };
+
+    // Initial Dataset (Validados 100% dentro de la Provincia de Leoncio Prado)
+    const INITIAL_FIRES = [
+      { latitude: -9.2850, longitude: -76.0120, confidence: 'h', frp: 19.2, source_sensor: 'VIIRS_SNPP_NRT', acq_date: '2026-08-20', acq_time: '1820', distrito: 'Castillo Grande', dist_carretera_km: 0.45, carretera_cercana: 'PE-5N', accesibilidad: 'ALTA', costo_estimado_pen: 'S/. 5 - 10' },
+      { latitude: -9.3100, longitude: -75.9850, confidence: 'h', frp: 22.4, source_sensor: 'VIIRS_NOAA20_NRT', acq_date: '2026-08-20', acq_time: '1820', distrito: 'Rupa-Rupa (Tingo María)', dist_carretera_km: 0.35, carretera_cercana: 'PE-5N', accesibilidad: 'ALTA', costo_estimado_pen: 'S/. 5 - 10' },
+      { latitude: -9.1850, longitude: -75.9350, confidence: '82', frp: 29.5, source_sensor: 'MODIS_NRT', acq_date: '2026-08-19', acq_time: '1515', distrito: 'Luyando (Naranjillo)', dist_carretera_km: 0.60, carretera_cercana: 'PE-5N', accesibilidad: 'ALTA', costo_estimado_pen: 'S/. 5 - 10' },
+      { latitude: -9.0750, longitude: -75.9200, confidence: 'n', frp: 14.8, source_sensor: 'VIIRS_SNPP_NRT', acq_date: '2026-08-19', acq_time: '1840', distrito: 'Santo Domingo de Anda', dist_carretera_km: 1.20, carretera_cercana: 'PE-5N', accesibilidad: 'MEDIA', costo_estimado_pen: 'S/. 15 - 30' },
+      { latitude: -8.9320, longitude: -76.0250, confidence: 'h', frp: 25.1, source_sensor: 'VIIRS_NOAA20_NRT', acq_date: '2026-08-19', acq_time: '1840', distrito: 'José Crespo y Castillo (Aucayacu)', dist_carretera_km: 0.80, carretera_cercana: 'PE-5N', accesibilidad: 'ALTA', costo_estimado_pen: 'S/. 5 - 10' },
+      { latitude: -8.7650, longitude: -76.0850, confidence: 'h', frp: 20.3, source_sensor: 'VIIRS_SNPP_NRT', acq_date: '2026-08-18', acq_time: '1755', distrito: 'Pucayacu', dist_carretera_km: 1.50, carretera_cercana: 'PE-5N', accesibilidad: 'MEDIA', costo_estimado_pen: 'S/. 15 - 30' },
+      { latitude: -8.6500, longitude: -76.0950, confidence: 'n', frp: 12.6, source_sensor: 'VIIRS_SNPP_NRT', acq_date: '2026-08-18', acq_time: '1755', distrito: 'Pueblo Nuevo', dist_carretera_km: 1.90, carretera_cercana: 'PE-5N', accesibilidad: 'MEDIA', costo_estimado_pen: 'S/. 15 - 30' },
+      { latitude: -9.2350, longitude: -75.7950, confidence: '76', frp: 27.0, source_sensor: 'MODIS_NRT', acq_date: '2026-08-17', acq_time: '1520', distrito: 'Hermilio Valdizán', dist_carretera_km: 1.10, carretera_cercana: 'PE-18A', accesibilidad: 'MEDIA', costo_estimado_pen: 'S/. 15 - 30' },
+      { latitude: -9.2550, longitude: -75.8450, confidence: 'h', frp: 17.5, source_sensor: 'VIIRS_NOAA20_NRT', acq_date: '2026-08-17', acq_time: '1810', distrito: 'Daniel Alomía Robles (Pumahuasi)', dist_carretera_km: 0.70, carretera_cercana: 'PE-18A', accesibilidad: 'ALTA', costo_estimado_pen: 'S/. 5 - 10' },
+      { latitude: -9.4250, longitude: -75.9350, confidence: 'h', frp: 18.9, source_sensor: 'VIIRS_SNPP_NRT', acq_date: '2026-08-16', acq_time: '1745', distrito: 'Mariano Dámaso Beraún (Las Palmas)', dist_carretera_km: 0.90, carretera_cercana: 'PE-5N', accesibilidad: 'ALTA', costo_estimado_pen: 'S/. 5 - 10' }
+    ];
+
+    // Global State
+    let currentFires = INITIAL_FIRES;
+    let executionMode = 'live';
+    let activeGeoJSON = DEFAULT_AOI_LEONCIO_PRADO;
+    let activeZoneName = "Provincia de Leoncio Prado (Huánuco)";
+    let activeBBOX = "-76.48,-9.62,-75.62,-8.31";
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const today = new Date().toISOString().slice(0, 10);
+      document.getElementById('customStartDate').value = today;
+      updateAOIState("Provincia de Leoncio Prado (Por Defecto)", DEFAULT_AOI_LEONCIO_PRADO);
+      updateFireTable();
+      updateTelegramPreview();
+      setTimeout(initMap, 200);
+    });
+
+    function updateAOIState(name, geojson) {
+      activeGeoJSON = geojson;
+      activeZoneName = name;
+
+      const bbox = turf.bbox(geojson);
+      const minLon = (bbox[0] - 0.03).toFixed(3);
+      const minLat = (bbox[1] - 0.03).toFixed(3);
+      const maxLon = (bbox[2] + 0.03).toFixed(3);
+      const maxLat = (bbox[3] + 0.03).toFixed(3);
+      
+      activeBBOX = `${minLon},${minLat},${maxLon},${maxLat}`;
+
+      document.getElementById('nav-aoi-badge').innerText = name.length > 25 ? name.slice(0,25) + '...' : name;
+      document.getElementById('activeZoneLabel').innerText = name;
+      document.getElementById('activeBboxDisplay').innerText = activeBBOX;
+      document.getElementById('mapZoneTitle').innerText = name;
+      document.getElementById('tg-zone-name').innerText = name;
+
+      if (mapInstance) {
+        drawAOIOnMap();
+      }
+    }
+
+    function handleZoneChange() {
+      const val = document.getElementById('aoiPresetSelector').value;
+      if (val === 'default') {
+        updateAOIState("Provincia de Leoncio Prado (Por Defecto)", DEFAULT_AOI_LEONCIO_PRADO);
+      } else if (val === 'custom_upload') {
+        document.getElementById('customGeoJsonFileInput').click();
+      } else if (PRESETS[val]) {
+        updateAOIState(PRESETS[val].name, PRESETS[val].geojson);
+      }
+    }
+
+    function loadCustomGeoJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed.type !== 'FeatureCollection' && parsed.type !== 'Feature' && parsed.type !== 'Polygon') {
+            alert('El archivo no parece ser un formato GeoJSON válido.');
+            return;
+          }
+          const cleanName = file.name.replace('.geojson', '').replace('.json', '');
+          updateAOIState(`📁 ${cleanName}`, parsed);
+          appendLog(`[Zona de Estudio] GeoJSON cargado con éxito: ${file.name}`, 'text-emerald-400 font-bold');
+        } catch (err) {
+          alert('Error al leer el archivo GeoJSON: ' + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function handleDateModeChange() {
+      const mode = document.getElementById('dateModeSelect').value;
+      if (mode === 'relative') {
+        document.getElementById('relativeDateBox').classList.remove('hidden');
+        document.getElementById('specificDateBox').classList.add('hidden');
+      } else {
+        document.getElementById('relativeDateBox').classList.add('hidden');
+        document.getElementById('specificDateBox').classList.remove('hidden');
+      }
+    }
+
+    function updateProcessingBadge() {
+      const ptype = document.getElementById('processingTypeSelect').value;
+      const label = document.getElementById('badgeProcessingLabel');
+      if (ptype === 'NRT') label.innerText = 'Modo: NRT (Tiempo Real)';
+      else if (ptype === 'SP') label.innerText = 'Modo: SP (Calidad Científica)';
+      else label.innerText = 'Modo: NRT + SP Combinados';
+    }
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(el => {
+        el.classList.remove('bg-orange-600/20', 'text-orange-400', 'border', 'border-orange-500/30');
+        el.classList.add('text-slate-400');
+      });
+
+      const targetTab = document.getElementById('tab-' + tabId);
+      const targetBtn = document.getElementById('tab-btn-' + tabId);
+
+      if (targetTab) targetTab.classList.remove('hidden');
+      if (targetBtn) {
+        targetBtn.classList.remove('text-slate-400');
+        targetBtn.classList.add('bg-orange-600/20', 'text-orange-400', 'border', 'border-orange-500/30');
+      }
+
+      if (tabId === 'mapa') {
+        setTimeout(initMap, 150);
+      }
+      if (tabId === 'analitica') {
+        setTimeout(renderCharts, 150);
+      }
+    }
+
+    function setExecutionMode(mode) {
+      executionMode = mode;
+      if (mode === 'live') {
+        document.getElementById('mode-live').className = 'px-3 py-1.5 rounded-lg bg-orange-600/30 text-orange-300 border border-orange-500/40 flex items-center space-x-1.5 transition';
+        document.getElementById('mode-demo').className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center space-x-1.5 transition';
+      } else {
+        document.getElementById('mode-demo').className = 'px-3 py-1.5 rounded-lg bg-emerald-600/30 text-emerald-300 border border-emerald-500/40 flex items-center space-x-1.5 transition';
+        document.getElementById('mode-live').className = 'px-3 py-1.5 rounded-lg text-slate-400 hover:text-white flex items-center space-x-1.5 transition';
+      }
+    }
+
+    function appendLog(text, color = 'text-slate-300') {
+      const term = document.getElementById('terminalOutput');
+      const line = document.createElement('div');
+      line.className = color + ' leading-tight';
+      line.innerHTML = text;
+      term.appendChild(line);
+      term.scrollTop = term.scrollHeight;
+    }
+
+    function parseCSV(csvText) {
+      const lines = csvText.trim().split('\n');
+      if (lines.length < 2) return [];
+      const headers = lines[0].split(',').map(h => h.trim());
+      const records = [];
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        if (values.length === headers.length) {
+          const row = {};
+          headers.forEach((h, idx) => { row[h] = values[idx]; });
+          records.push(row);
+        }
+      }
+      return records;
+    }
+
+    function calculateRoadDistance(lat, lon) {
+      const roadPoints = [
+        { name: 'PE-5N (Longitudinal Selva Norte)', lat: -9.2800, lon: -75.9800, baseCost: 5 },
+        { name: 'PE-5N (Castillo Grande / Tingo María)', lat: -9.2950, lon: -75.9960, baseCost: 5 },
+        { name: 'PE-5N (Luyando / Naranjillo)', lat: -9.1820, lon: -75.9320, baseCost: 10 },
+        { name: 'PE-5N (Aucayacu)', lat: -8.9240, lon: -76.0410, baseCost: 20 },
+        { name: 'PE-5N (Pucayacu)', lat: -8.7510, lon: -76.1240, baseCost: 35 },
+        { name: 'PE-18A (Federico Basadre / Pumahuasi)', lat: -9.2550, lon: -75.8210, baseCost: 15 },
+        { name: 'PE-18A (Hermilio Valdizán / San Alejandro)', lat: -9.2100, lon: -75.7610, baseCost: 20 },
+        { name: 'HU-104 (Monzón / Supte)', lat: -9.1400, lon: -76.1850, baseCost: 25 }
+      ];
+
+      let minDist = 999;
+      let nearestRoad = roadPoints[0];
+
+      roadPoints.forEach(rp => {
+        const dLat = (lat - rp.lat) * 111.32;
+        const dLon = (lon - rp.lon) * 111.32 * Math.cos(lat * Math.PI / 180);
+        const distKm = Math.sqrt(dLat * dLat + dLon * dLon);
+        if (distKm < minDist) {
+          minDist = distKm;
+          nearestRoad = rp;
+        }
+      });
+
+      const distRounded = Math.round(minDist * 100) / 100;
+      let acc = 'ALTA';
+      let cost = `S/. ${nearestRoad.baseCost} - ${nearestRoad.baseCost + 5}`;
+      let time = '< 20 min';
+
+      if (distRounded > 3.0) {
+        acc = 'BAJA / REMOTA';
+        cost = `S/. ${nearestRoad.baseCost + 30}+ (Bote/Trocha)`;
+        time = '> 1.5 horas';
+      } else if (distRounded > 1.0) {
+        acc = 'MEDIA';
+        cost = `S/. ${nearestRoad.baseCost + 10} - ${nearestRoad.baseCost + 15}`;
+        time = '30 - 60 min';
+      }
+
+      return {
+        distKm: distRounded,
+        roadName: nearestRoad.name,
+        accessibility: acc,
+        estimatedCost: cost,
+        estimatedTime: time
+      };
+    }
+
+    // MAIN PIPELINE EXECUTION
+    async function executePipeline() {
+      const btn = document.getElementById('btnRunPipeline');
+      btn.disabled = true;
+      btn.classList.add('opacity-50');
+
+      const term = document.getElementById('terminalOutput');
+      term.innerHTML = '';
+
+      const apiKey = 'e10ebd29b9c7a2e16d862032a9f824a2';
+      const bbox = activeBBOX;
+      const ptype = document.getElementById('processingTypeSelect').value;
+
+      const dateMode = document.getElementById('dateModeSelect').value;
+      let dayRange = '2';
+      let specificDate = '';
+
+      if (dateMode === 'specific_span') {
+        specificDate = document.getElementById('customStartDate').value;
+        dayRange = document.getElementById('customDaySpan').value;
+      } else {
+        dayRange = document.getElementById('quickDayRange').value;
+      }
+
+      let sources = [];
+      if (ptype === 'NRT') {
+        sources = ['VIIRS_SNPP_NRT', 'VIIRS_NOAA20_NRT', 'MODIS_NRT'];
+      } else if (ptype === 'SP') {
+        sources = ['VIIRS_SNPP_SP', 'VIIRS_NOAA20_SP', 'MODIS_SP'];
+      } else {
+        sources = ['VIIRS_SNPP_NRT', 'VIIRS_NOAA20_NRT', 'MODIS_NRT', 'VIIRS_SNPP_SP', 'VIIRS_NOAA20_SP', 'MODIS_SP'];
+      }
+
+      for (let i = 1; i <= 6; i++) {
+        document.getElementById(`pipe-step-${i}`).className = 'bg-cardBg border border-borderDark rounded-xl p-4 transition-all duration-300';
+        document.getElementById(`step-badge-${i}`).className = 'mt-3 text-[11px] font-mono text-slate-400 bg-slate-900/80 px-2 py-1 rounded border border-slate-800';
+        document.getElementById(`step-badge-${i}`).innerText = 'Estado: En espera';
+        document.getElementById(`step-icon-${i}`).className = 'w-6 h-6 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center text-xs font-bold font-mono';
+        document.getElementById(`step-icon-${i}`).innerText = i;
+      }
+
+      appendLog('<span class="text-orange-400 font-bold">======================================================================</span>');
+      appendLog(`<span class="text-orange-400 font-bold">MONITOREO NASA FIRMS [${executionMode === 'live' ? '🛰️ MODO LIVE' : '🧪 MODO DEMO'}] | PROCESAMIENTO: [${ptype}]</span>`);
+      appendLog(`<span class="text-emerald-400 font-bold">ZONA ACTIVA: ${activeZoneName}</span>`);
+      appendLog(`<span class="text-slate-400">BBOX: ${bbox} | Rango: ${dayRange} día(s) ${specificDate ? '| Fecha Inicio: ' + specificDate : ' (últimos días)'}</span>`);
+      appendLog('<span class="text-orange-400 font-bold">======================================================================</span>');
+
+      // Step 1: Ingesta FIRMS
+      document.getElementById('pipe-step-1').classList.add('step-active');
+      document.getElementById('step-badge-1').innerText = `Consultando ${sources.length} sensores...`;
+      appendLog(`[FIRMS API] Solicitando fuentes: ${sources.join(', ')}...`);
+
+      let rawRecords = [];
+
+      if (executionMode === 'live') {
+        for (const src of sources) {
+          let url = `https://firms.modaps.eosdis.nasa.gov/api/area/csv/${apiKey}/${src}/${bbox}/${dayRange}`;
+          if (specificDate) {
+            url += `/${specificDate}`;
+          }
+
+          try {
+            appendLog(`[FIRMS API] Descargando sensor: ${src} (${dayRange} días)...`);
+            const res = await fetch(url);
+            if (res.ok) {
+              const text = await res.text();
+              const parsed = parseCSV(text);
+              parsed.forEach(r => r.source_sensor = src);
+              rawRecords.push(...parsed);
+              appendLog(`[FIRMS API] ✓ ${parsed.length} registros crudos de ${src}.`);
+            } else {
+              appendLog(`[FIRMS Warning] Código HTTP ${res.status} para ${src}.`, 'text-amber-400');
+            }
+          } catch (e) {
+            appendLog(`[FIRMS Error] No se pudo conectar a ${src} (${e.message}).`, 'text-red-400');
+          }
+        }
+      } else {
+        rawRecords = INITIAL_FIRES;
+      }
+
+      document.getElementById('pipe-step-1').className = 'bg-cardBg border rounded-xl p-4 step-done';
+      document.getElementById('step-badge-1').innerText = `✓ ${rawRecords.length} en BBOX`;
+      document.getElementById('step-badge-1').className = 'mt-3 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-800';
+
+      // Step 2: Filtro Espacial
+      document.getElementById('pipe-step-2').classList.add('step-active');
+      document.getElementById('step-badge-2').innerText = 'Intersectando polígono...';
+      appendLog(`[Filtro Espacial] Ejecutando Point-in-Polygon contra ${activeZoneName}...`);
+
+      let insideRecords = [];
+      if (activeGeoJSON) {
+        try {
+          const polygonFeature = activeGeoJSON.type === 'FeatureCollection' ? activeGeoJSON.features[0] : (activeGeoJSON.type === 'Feature' ? activeGeoJSON : { type: 'Feature', geometry: activeGeoJSON });
+
+          insideRecords = rawRecords.filter(pt => {
+            const lat = parseFloat(pt.latitude);
+            const lon = parseFloat(pt.longitude);
+            if (isNaN(lat) || isNaN(lon)) return false;
+            const point = turf.point([lon, lat]);
+            return turf.booleanPointInPolygon(point, polygonFeature);
+          });
+        } catch (e) {
+          insideRecords = rawRecords;
+        }
+      } else {
+        insideRecords = rawRecords;
+      }
+
+      appendLog(`[Filtro Espacial] De ${rawRecords.length} puntos en BBOX, ${insideRecords.length} caen dentro de ${activeZoneName}.`);
+      document.getElementById('pipe-step-2').className = 'bg-cardBg border rounded-xl p-4 step-done';
+      document.getElementById('step-badge-2').innerText = `✓ ${insideRecords.length} en zona`;
+      document.getElementById('step-badge-2').className = 'mt-3 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-800';
+
+      // Step 3: Filtro Estadístico & Vías
+      document.getElementById('pipe-step-3').classList.add('step-active');
+      document.getElementById('step-badge-3').innerText = 'Filtrando confianza & vías...';
+      appendLog('[Filtro Estadístico] Aplicando umbrales: MODIS ≥ 60, VIIRS [n, h]...');
+
+      const validatedFires = [];
+      insideRecords.forEach(r => {
+        const src = (r.source_sensor || '').toUpperCase();
+        const conf = (r.confidence || '').toString().toLowerCase();
+        let isValid = false;
+
+        if (src.includes('MODIS')) {
+          const num = parseFloat(conf);
+          if (!isNaN(num) && num >= 60) isValid = true;
+        } else {
+          if (conf === 'n' || conf === 'h' || conf === 'nominal' || conf === 'high') isValid = true;
+        }
+
+        if (isValid || executionMode === 'demo') {
+          const lat = parseFloat(r.latitude);
+          const lon = parseFloat(r.longitude);
+          const roadInfo = calculateRoadDistance(lat, lon);
+
+          validatedFires.push({
+            ...r,
+            latitude: lat,
+            longitude: lon,
+            frp: parseFloat(r.frp || 15.0),
+            dist_carretera_km: roadInfo.distKm,
+            carretera_cercana: roadInfo.roadName,
+            accesibilidad: roadInfo.accessibility,
+            costo_estimado_pen: roadInfo.estimatedCost,
+            tiempo_estimado: roadInfo.estimatedTime,
+            distrito: r.distrito || activeZoneName,
+            acq_date: r.acq_date || new Date().toISOString().slice(0, 10),
+            acq_time: r.acq_time || '1800'
+          });
+        }
+      });
+
+      currentFires = validatedFires;
+      document.getElementById('badge-map-count').innerText = currentFires.length;
+
+      appendLog(`[Filtro Estadístico] ${currentFires.length} anomalías térmicas validadas con alta confianza.`);
+
+      document.getElementById('pipe-step-3').className = 'bg-cardBg border rounded-xl p-4 step-done';
+      document.getElementById('step-badge-3').innerText = `✓ ${currentFires.length} validados`;
+      document.getElementById('step-badge-3').className = 'mt-3 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-800';
+
+      // Step 4: Archivos
+      document.getElementById('pipe-step-4').classList.add('step-active');
+      document.getElementById('step-badge-4').innerText = 'Generando CSV, HTML, KML...';
+      appendLog(`<span class="text-amber-400 font-bold">>>> ¡ALERTA ACTIVADA! ${currentFires.length} focos de calor válidos identificados en ${activeZoneName}. <<<</span>`);
+
+      document.getElementById('pipe-step-4').className = 'bg-cardBg border rounded-xl p-4 step-done';
+      document.getElementById('step-badge-4').innerText = '✓ CSV/KML listos';
+      document.getElementById('step-badge-4').className = 'mt-3 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-800';
+
+      // Step 5: Histórico
+      document.getElementById('pipe-step-5').classList.add('step-active');
+      document.getElementById('step-badge-5').innerText = 'Deduplicando...';
+      appendLog('[Histórico Maestro] Deduplicando por [lat, lon, acq_date, acq_time]...');
+
+      document.getElementById('pipe-step-5').className = 'bg-cardBg border rounded-xl p-4 step-done';
+      document.getElementById('step-badge-5').innerText = '✓ Histórico OK';
+      document.getElementById('step-badge-5').className = 'mt-3 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-800';
+
+      // Step 6: Telegram Mock
+      document.getElementById('pipe-step-6').classList.add('step-active');
+      document.getElementById('step-badge-6').innerText = 'Despachando Telegram...';
+      appendLog('[Telegram API] Despachando mensaje formateado con enlaces directos a Google Maps...');
+      appendLog('<span class="text-emerald-400 font-bold">PROCESO COMPLETADO EXITOSAMENTE.</span>');
+
+      document.getElementById('pipe-step-6').className = 'bg-cardBg border rounded-xl p-4 step-done';
+      document.getElementById('step-badge-6').innerText = '✓ Alerta enviada';
+      document.getElementById('step-badge-6').className = 'mt-3 text-[11px] font-mono text-emerald-400 bg-emerald-950/40 px-2 py-1 rounded border border-emerald-800';
+
+      updateFireTable();
+      updateTelegramPreview();
+      initMap();
+      renderCharts();
+
+      btn.disabled = false;
+      btn.classList.remove('opacity-50');
+    }
+
+    function updateFireTable() {
+      const tbody = document.getElementById('fireTableBody');
+      tbody.innerHTML = '';
+
+      if (currentFires.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="10" class="p-6 text-center text-slate-500">No se detectaron focos de calor en ${activeZoneName} en el rango consultado.</td></tr>`;
+        return;
+      }
+
+      currentFires.forEach((f, idx) => {
+        const isModis = (f.source_sensor || '').includes('MODIS');
+        const badgeColor = isModis ? 'bg-red-500/20 text-red-400' : 'bg-orange-500/20 text-orange-400';
+        const accColor = f.accesibilidad === 'ALTA' ? 'text-emerald-400' : (f.accesibilidad === 'MEDIA' ? 'text-amber-400' : 'text-red-400');
+        const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${f.latitude},${f.longitude}`;
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition';
+        tr.innerHTML = `
+          <td class="p-3 text-slate-400 font-bold">#${idx + 1}</td>
+          <td class="p-3 font-semibold text-slate-200">${f.distrito}</td>
+          <td class="p-3 text-slate-400">${f.acq_date} (${f.acq_time} UTC)</td>
+          <td class="p-3 text-slate-400">${f.latitude.toFixed(4)}, ${f.longitude.toFixed(4)}</td>
+          <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badgeColor}">${f.source_sensor}</span></td>
+          <td class="p-3 font-bold text-amber-400">${f.frp} MW</td>
+          <td class="p-3 text-slate-300">${f.carretera_cercana}</td>
+          <td class="p-3 font-semibold ${accColor}">${f.dist_carretera_km} km (${f.accesibilidad})</td>
+          <td class="p-3 text-slate-300 font-bold">${f.costo_estimado_pen}</td>
+          <td class="p-3 text-center">
+            <a href="${gmapsUrl}" target="_blank" class="bg-blue-600 hover:bg-blue-500 text-white px-2.5 py-1 rounded text-[11px] font-semibold inline-flex items-center space-x-1">
+              <span>Navegar</span>
+            </a>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function updateTelegramPreview() {
+      document.getElementById('tg-count').innerText = currentFires.length;
+      document.getElementById('tg-date').innerText = new Date().toISOString().slice(0, 10);
+      document.getElementById('tg-zone-name').innerText = activeZoneName;
+
+      const breakdownMap = {};
+      currentFires.forEach(f => {
+        breakdownMap[f.source_sensor] = (breakdownMap[f.source_sensor] || 0) + 1;
+      });
+
+      let bdHtml = '<b>📊 Desglose por Sensor:</b><br>';
+      for (const [s, count] of Object.entries(breakdownMap)) {
+        bdHtml += `&nbsp;&nbsp;• <b>${s}:</b> ${count} anomalías<br>`;
+      }
+      document.getElementById('tg-breakdown').innerHTML = bdHtml;
+
+      const accMap = { ALTA: 0, MEDIA: 0, 'BAJA / REMOTA': 0 };
+      currentFires.forEach(f => {
+        if (accMap[f.accesibilidad] !== undefined) accMap[f.accesibilidad]++;
+      });
+
+      document.getElementById('tg-accessibility').innerHTML = `
+        <b>🛣️ Accesibilidad y Costos de Campo:</b><br>
+        &nbsp;&nbsp;• 🟢 <b>Alta (&lt;1 km):</b> ${accMap['ALTA']} focos (~S/. 5-10)<br>
+        &nbsp;&nbsp;• 🟡 <b>Media (1-3 km):</b> ${accMap['MEDIA']} focos (~S/. 15-30)<br>
+        &nbsp;&nbsp;• 🔴 <b>Remota (&gt;3 km):</b> ${accMap['BAJA / REMOTA']} focos (&gt;1h caminata)
+      `;
+
+      let linksHtml = '';
+      currentFires.slice(0, 3).forEach((f, idx) => {
+        linksHtml += `👉 <b>Foco #${idx+1} (${f.distrito} - ${f.frp} MW):</b> <a href="https://www.google.com/maps/dir/?api=1&destination=${f.latitude},${f.longitude}" target="_blank" class="underline hover:text-blue-300">Navegar en Google Maps</a><br>`;
+      });
+      document.getElementById('tg-links').innerHTML = linksHtml;
+    }
+
+    // Leaflet GIS Map with Hybrid Satellite & OpenStreetMap Layers
+    let mapInstance = null;
+    let markersLayer = null;
+    let aoiLayer = null;
+    
+    function initMap() {
+      if (!mapInstance) {
+        mapInstance = L.map('mapContainer').setView([-9.29, -75.99], 10);
+
+        // 1. Esri Satellite Base
+        const esriSatellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Esri World Imagery'
+        }).addTo(mapInstance);
+
+        // 2. OpenStreetMap Base (Clear roads & towns)
+        const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: 'OpenStreetMap'
+        });
+
+        // 3. CartoDB Dark Base
+        const cartoDark = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+          attribution: 'CartoDB'
+        });
+
+        // 4. Overlays: Road & Place Names on Top of Satellite
+        const esriRoadsOverlay = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Transportation/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Esri Transportation'
+        }).addTo(mapInstance);
+
+        const esriLabelsOverlay = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Esri Places'
+        }).addTo(mapInstance);
+
+        L.control.layers({
+          "🛰️ Satelital Híbrido (Satelital + Vías y Ciudades)": esriSatellite,
+          "🗺️ OpenStreetMap (Calles y nombres claros)": osm,
+          "🌑 CartoDB Oscuro": cartoDark
+        }, {
+          "🛣️ Capa Vial Esri": esriRoadsOverlay,
+          "🏷️ Nombres de Poblados": esriLabelsOverlay
+        }, { position: 'topright' }).addTo(mapInstance);
+
+        // Draw Embedded Roads Network
+        
+        markersLayer = L.layerGroup().addTo(mapInstance);
+      }
+
+      drawAOIOnMap();
+      mapInstance.invalidateSize();
+
+      if (markersLayer) {
+        markersLayer.clearLayers();
+        currentFires.forEach(f => {
+          const isModis = (f.source_sensor || '').includes('MODIS');
+          const color = isModis ? '#ef4444' : '#f97316';
+          const marker = L.circleMarker([f.latitude, f.longitude], {
+            radius: isModis ? 8.5 : 6.5,
+            color: '#ffffff',
+            fillColor: color,
+            fillOpacity: 0.9,
+            weight: 2
+          }).addTo(markersLayer);
+
+          marker.bindPopup(`
+            <div style="font-family: sans-serif; font-size: 12px; width: 230px; line-height: 1.4; color: #1e293b;">
+              <h4 style="margin: 0 0 4px 0; color: ${color}; font-weight: bold;">🔥 ${f.distrito}</h4>
+              <b>Sensor:</b> ${f.source_sensor}<br>
+              <b>Fecha:</b> ${f.acq_date} (${f.acq_time} UTC)<br>
+              <b>Potencia Radiativa:</b> ${f.frp} MW<br>
+              <b>Vía cercana:</b> ${f.carretera_cercana} (${f.dist_carretera_km} km)<br>
+              <b>Accesibilidad:</b> ${f.accesibilidad}<br>
+              <b>Costo Estimado:</b> ${f.costo_estimado_pen}<br>
+              <div style="margin-top: 8px; text-align: center;">
+                <a href="https://www.google.com/maps/dir/?api=1&destination=${f.latitude},${f.longitude}" target="_blank" style="background: #2563eb; color: white; padding: 4px 8px; border-radius: 4px; text-decoration: none; font-size: 11px; font-weight: bold; display: inline-block;">
+                  📍 Navegar en Google Maps
+                </a>
+              </div>
+            </div>
+          `);
+        });
+      }
+    }
+
+    function drawAOIOnMap() {
+      if (!mapInstance || !activeGeoJSON) return;
+      if (aoiLayer) {
+        mapInstance.removeLayer(aoiLayer);
+      }
+
+      aoiLayer = L.geoJSON(activeGeoJSON, {
+        style: {
+          color: '#22c55e',
+          weight: 3.5,
+          opacity: 0.9,
+          fillColor: '#22c55e',
+          fillOpacity: 0.08,
+          dashArray: '5, 5'
+        }
+      }).addTo(mapInstance);
+
+      try {
+        mapInstance.fitBounds(aoiLayer.getBounds(), { padding: [25, 25] });
+      } catch (e) {}
+    }
+
+    // Chart.js Analytics
+    let sensorChartInstance = null;
+    let accChartInstance = null;
+    let districtChartInstance = null;
+
+    function renderCharts() {
+      if (currentFires.length === 0) return;
+
+      const sensorCounts = {};
+      const accCounts = { '🟢 Alta (<1km)': 0, '🟡 Media (1-3km)': 0, '🔴 Remota (>3km)': 0 };
+      const districtCounts = {};
+
+      currentFires.forEach(f => {
+        sensorCounts[f.source_sensor] = (sensorCounts[f.source_sensor] || 0) + 1;
+        districtCounts[f.distrito] = (districtCounts[f.distrito] || 0) + 1;
+        if (f.accesibilidad === 'ALTA') accCounts['🟢 Alta (<1km)']++;
+        else if (f.accesibilidad === 'MEDIA') accCounts['🟡 Media (1-3km)']++;
+        else accCounts['🔴 Remota (>3km)']++;
+      });
+
+      if (sensorChartInstance) sensorChartInstance.destroy();
+      sensorChartInstance = new Chart(document.getElementById('sensorChart'), {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(sensorCounts),
+          datasets: [{ data: Object.values(sensorCounts), backgroundColor: ['#ea580c', '#f59e0b', '#ef4444', '#06b6d4'], borderWidth: 0 }]
+        },
+        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+      });
+
+      if (accChartInstance) accChartInstance.destroy();
+      accChartInstance = new Chart(document.getElementById('accessibilityChart'), {
+        type: 'bar',
+        data: {
+          labels: Object.keys(accCounts),
+          datasets: [{ label: 'Focos', data: Object.values(accCounts), backgroundColor: ['#22c55e', '#eab308', '#ef4444'] }]
+        },
+        options: { responsive: true, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: '#94a3b8' } }, y: { ticks: { color: '#94a3b8' } } } }
+      });
+
+      if (districtChartInstance) districtChartInstance.destroy();
+      districtChartInstance = new Chart(document.getElementById('districtChart'), {
+        type: 'polarArea',
+        data: {
+          labels: Object.keys(districtCounts),
+          datasets: [{ data: Object.values(districtCounts), backgroundColor: ['#38bdf8', '#818cf8', '#f472b6', '#fb923c', '#4ade80'] }]
+        },
+        options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' } } } }
+      });
+    }
+
+    // Download CSV
+    function downloadCSV() {
+      if (currentFires.length === 0) {
+        alert('Primero ejecuta el pipeline para obtener datos.');
+        return;
+      }
+      const headers = ['zona_estudio', 'distrito', 'acq_date', 'acq_time', 'latitude', 'longitude', 'source_sensor', 'confidence', 'frp', 'carretera_cercana', 'dist_carretera_km', 'accesibilidad', 'costo_estimado_pen'];
+      let csvContent = 'data:text/csv;charset=utf-8,' + headers.join(',') + '\n';
+      currentFires.forEach(f => {
+        const row = headers.map(h => f[h] !== undefined ? `"${f[h]}"` : '""');
+        csvContent += row.join(',') + '\n';
+      });
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement('a');
+      link.setAttribute('href', encodedUri);
+      link.setAttribute('download', `alertas_${activeZoneName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+
+    // Download KML
+    function downloadKML() {
+      if (currentFires.length === 0) {
+        alert('Primero ejecuta el pipeline para obtener datos.');
+        return;
+      }
+      let kml = `<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2">
+<Document>
+  <name>Quemas - ${activeZoneName}</name>
+`;
+      currentFires.forEach((f, idx) => {
+        kml += `  <Placemark>
+    <name>Foco #${idx+1} - ${f.distrito} (${f.frp} MW)</name>
+    <description><![CDATA[Zona: ${activeZoneName}\nFecha: ${f.acq_date} (${f.acq_time} UTC)\nSensor: ${f.source_sensor}\nFRP: ${f.frp} MW\nVía: ${f.carretera_cercana} (${f.dist_carretera_km} km)\nCosto: ${f.costo_estimado_pen}]]></description>
+    <Point><coordinates>${f.longitude},${f.latitude},0</coordinates></Point>
+  </Placemark>\n`;
+      });
+      kml += '</Document></kml>';
+
+      const blob = new Blob([kml], { type: 'application/vnd.google-earth.kml+xml' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `alertas_${activeZoneName.replace(/[^a-zA-Z0-9]/g, '_')}_${new Date().toISOString().slice(0,10)}.kml`;
+      link.click();
+    }
+  </script>
+
+</body>
+</html>

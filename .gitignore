@@ -1,0 +1,19 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+
+# Temporal outputs
+*.zip
+*.log
+scratch/
+.system_generated/
+
+# OS files
+.DS_Store
+Thumbs.db
