@@ -37,23 +37,36 @@ jobs:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: |
-          python main.py
+          # --incluir-baja-confianza conserva las detecciones que no superan el
+          # umbral, marcadas con tipo_registro=baja_confianza. No alteran el
+          # conteo de focos validados y permiten analizar omision en la tesis.
+          python main.py --incluir-baja-confianza
 
-      - name: "5. Guardar y commitear histórico actualizado"
+      - name: "5. Guardar y commitear histórico y registro de ejecuciones"
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Verificar si se modificó o generó el CSV histórico
-          if [ -f historico_leoncio_prado_2026.csv ]; then
-            git add historico_leoncio_prado_2026.csv
-            
-            if git diff --staged --quiet; then
-              echo "No hay nuevas quemas hoy. Histórico sin cambios."
-            else
-              FECHA=$(date -u +"%Y-%m-%d")
-              git commit -m "chore(data): actualización automática histórico de quemas [$FECHA] [skip ci]"
-              git push
-              echo "Histórico de quemas actualizado y sincronizado en la rama principal."
+
+          ARCHIVOS=""
+          for f in historico_leoncio_prado_2026.csv registro_ejecuciones.csv; do
+            if [ -f "$f" ]; then
+              git add "$f"
+              ARCHIVOS="$ARCHIVOS $f"
             fi
+          done
+
+          if [ -z "$ARCHIVOS" ]; then
+            echo "No se encontraron archivos de datos para versionar."
+            exit 0
+          fi
+
+          echo "Archivos preparados:$ARCHIVOS"
+
+          if git diff --staged --quiet; then
+            echo "Sin cambios en los datos respecto al commit anterior."
+          else
+            FECHA=$(date -u +"%Y-%m-%d")
+            git commit -m "chore(data): actualización automática histórico de quemas [$FECHA] [skip ci]"
+            git push
+            echo "Datos sincronizados en la rama principal."
           fi
