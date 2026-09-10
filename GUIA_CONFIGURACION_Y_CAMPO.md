@@ -47,9 +47,16 @@ Nunca pongas tus claves directamente en el código público de GitHub. Se config
 
 | Nombre del Secreto (`Name`) | Valor (`Secret`) |
 | :--- | :--- |
-| **`FIRMS_API_KEY`** | `e10ebd29b9c7a2e16d862032a9f824a2` |
+| **`FIRMS_API_KEY`** | *(Tu MAP_KEY de FIRMS — ver paso 0 abajo)* |
 | **`TELEGRAM_BOT_TOKEN`** | *(El token provisto por @BotFather)* |
 | **`TELEGRAM_CHAT_ID`** | *(Tu número de ID provisto por @userinfobot)* |
+
+> ⚠️ **Paso 0 — Obtén una MAP_KEY nueva.**
+> La clave que se usó antes quedó escrita en este documento y en copias del repositorio,
+> así que debe considerarse **comprometida**. Solicita una nueva (es gratis e inmediata) en
+> <https://firms.modaps.eosdis.nasa.gov/api/map_key/> e ingrésala como secreto.
+> **Nunca escribas la clave en el código ni en esta guía.** El sistema la lee siempre de la
+> variable de entorno `FIRMS_API_KEY`.
 
 6. **Permisos de Escritura del Workflow:**
    * En `Settings > Actions > General > Workflow permissions`, selecciona **"Read and write permissions"** y haz clic en **Save**. Esto permite que GitHub Actions guarde el histórico automáticamente.
@@ -67,18 +74,44 @@ Nunca pongas tus claves directamente en el código público de GitHub. Se config
 
 Si quieres ejecutar el script en tu computadora antes de subirlo a GitHub:
 
-1. Abre tu terminal de **PowerShell** en la carpeta `d:\Monitoreo de quemas`.
+1. Abre tu terminal de **PowerShell** en la carpeta del proyecto.
 2. Define temporalmente tus variables de entorno ejecutando:
    ```powershell
-   $env:FIRMS_API_KEY="e10ebd29b9c7a2e16d862032a9f824a2"
+   $env:FIRMS_API_KEY="TU_MAP_KEY_DE_FIRMS"
    $env:TELEGRAM_BOT_TOKEN="TU_TOKEN_DE_BOTFATHER"
    $env:TELEGRAM_CHAT_ID="TU_CHAT_ID"
    ```
-3. Ejecuta el script:
+3. Ejecuta el ciclo completo (recomendado):
    ```powershell
-   python main.py
+   python sincronizar_datos.py
    ```
-4. El sistema descargará las anomalías reales de las últimas 48h, calculará las distancias a la red vial, verificará la lluvia y te enviará la alerta a Telegram con el mapa HTML, CSV y KML.
+   O bien el pipeline solo:
+   ```powershell
+   python main.py --incluir-baja-confianza
+   ```
+4. El sistema descargará las anomalías reales de las últimas 48 h, calculará las distancias a
+   la red vial oficial, verificará la lluvia y te enviará la alerta a Telegram con el mapa HTML,
+   CSV y KML. Además registrará la ejecución en `registro_ejecuciones.csv`, incluso si ese día
+   no hubo detecciones.
+
+### Comprobar que los datos son reales
+
+Si alguna vez necesitas demostrar que el histórico no contiene datos simulados:
+
+```powershell
+python verificar_historico.py --informe reporte_verificacion.md
+```
+
+Descarga la respuesta cruda de NASA FIRMS y contrasta registro por registro las coordenadas,
+la fecha, la hora y los campos físicos (FRP, confianza, temperaturas de brillo). El informe
+indica cuántos coinciden exactamente y cuántos quedan fuera de la ventana verificable
+(la API solo conserva 5 días hacia atrás).
+
+### Si el proceso no encuentra la clave
+
+El sistema falla de forma explícita con `estado=error, detalle=FIRMS_API_KEY no configurada`
+en lugar de reportar "sin detecciones". Si ves ese mensaje, la variable de entorno no está
+definida en esa sesión de terminal.
 
 ---
 
