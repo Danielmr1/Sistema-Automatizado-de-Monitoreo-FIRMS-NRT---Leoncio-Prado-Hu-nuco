@@ -1,0 +1,11 @@
+﻿fecha_utc,hora_utc,dias_consultados,fecha_inicio,sensores_consultados,registros_crudos_bbox,dentro_aoi,validados,baja_confianza,errores_fuente,estado,detalle
+2026-09-10,05:07:20,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,39,17,16,1,0,ok,16 focos guardados en histórico
+2026-09-10,05:07:50,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,39,17,16,1,0,ok,17 focos guardados en histórico
+2026-09-10,05:08:22,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,39,17,16,1,0,ok,17 focos guardados en histórico
+2026-09-10,05:13:07,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,39,17,16,1,0,ok,17 focos guardados en histórico
+2026-09-10,05:13:41,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,0,0,0,0,0,error,FIRMS_API_KEY no configurada
+2026-09-10,05:14:09,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,39,17,16,1,0,ok,17 focos guardados en histórico
+2026-09-10,05:31:11,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,39,17,16,1,0,ok,17 focos guardados en histórico
+2026-09-10,05:31:40,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,39,17,16,1,0,ok,17 focos guardados en histórico
+2026-09-10,22:09:15,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,58,20,19,1,0,ok,20 focos guardados en histórico
+2026-09-10,22:11:42,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,58,20,19,1,0,ok,20 focos guardados en histórico
