@@ -1,5 +1,5 @@
+# Dependencias reales del sistema de monitoreo FIRMS NRT.
+# El pipeline (main.py) usa unicamente estas dos librerias; el filtrado espacial
+# se implementa con ray casting en la libreria estandar (sin geopandas/shapely).
 pandas>=2.0.0
-geopandas>=0.14.0
-shapely>=2.0.0
 requests>=2.28.0
-folium>=0.14.0
