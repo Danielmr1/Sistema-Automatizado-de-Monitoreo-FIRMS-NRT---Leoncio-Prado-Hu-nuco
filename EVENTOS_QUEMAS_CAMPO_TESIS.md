@@ -1,217 +1,2839 @@
-# 🛰️ Matriz y Guía de Salidas a Campo: Verificación de Quemas Satelitales (FIRMS)
+# Matriz y Guía de Salidas a Campo: Verificación de Quemas Satelitales (FIRMS)
 **Proyecto de Tesis:** Monitoreo y Validación de Anomalías Térmicas / Quemas Agrícolas en la Provincia de Leoncio Prado (Huánuco)  
-**Fecha de Corte de Datos:** 20 de Agosto de 2026  
-**Total de Eventos Registrados:** 12 eventos validados  
+**Generado:** 2026-09-10 desde `historico_leoncio_prado_2026.csv`  
+**Ventana analizada:** últimos 30 días  
+**Total de eventos en esta matriz:** 297  
+**Fuente:** NASA FIRMS (MODIS + VIIRS NRT). Registros contrastados contra la respuesta cruda de la API; campo `verificado_firms` del histórico indica la fecha del contraste.
 
 ---
 
-## 📌 1. Importancia Científica para la Tesis (Ground Truthing / Verdad de Terreno)
+## 1. Resumen de la ventana
 
-En la región de selva alta (*Rupa-Rupa*), las condiciones de alta humedad, precipitación tropical y rápida dinámica de vegetación hacen que la **ventana temporal óptima para validación en campo sea de 24 a 72 horas** posteriores a la detección satelital:
-* **0 a 48 horas:** Presencia de ceniza fresca, brasas o humo residual, límites nítidos de la cicatriz de quema, fácil identificación del tipo de biomasa combustible original.
-* **3 a 7 días:** La lluvia lixivia la ceniza y arrastra carbón; la vegetación pionera o rebrotes comienzan a enmascarar la severidad.
-* **> 7 días:** La delimitación exacta del perímetro de la quema se vuelve difusa.
+* **Focos:** 297
+* **Días con detecciones:** 10 (2026-08-23 a 2026-09-10)
+* **Por sensor:** VIIRS_SNPP_NRT: 171, VIIRS_NOAA20_NRT: 125, MODIS_NRT: 1
+* **Por accesibilidad:** BAJA / REMOTA: 214, MEDIA: 47, ALTA: 36
+* **FRP máximo:** 175.37 MW | **FRP medio:** 9.58 MW
 
----
+### Distribución por distrito
 
-## 🚨 2. Priorización de Salidas a Campo (Orden de Urgencia)
-
-| Prioridad | Antigüedad | Distritos Clave | Justificación de Salida |
-| :--- | :--- | :--- | :--- |
-| 🔴 **URGENCIA MÁXIMA (Nivel 1)** | **Hoy (20 Ago 2026)** | Castillo Grande, Rupa-Rupa | Quemas activas/del día. Muestreo de ceniza fresca y condiciones in situ intactas. |
-| 🟠 **URGENCIA ALTA (Nivel 2)** | **Ayer (19 Ago 2026)** | Hermilio Valdizán, Santo Domingo de Anda | Quemas de 24h con alta potencia radiativa (MODIS 28.4 MW). Cicatrices frescas. |
-| 🟡 **PRIORIDAD MEDIA-ALTA (Nivel 3)** | **2-3 días (17-18 Ago)** | Pucayacu, Pueblo Nuevo, Daniel Alomía Robles | Evidencia de quema muy visible, posible carbón y afectación de fuste/copa. |
-| 🟢 **PRIORIDAD SEGUIMIENTO (Nivel 4)** | **4-6 días (14-16 Ago)** | Luyando, José Crespo y Castillo, Mariano Dámaso Beraún | Validación de cicatriz y cálculo de severidad retrospectiva (NBR / dNBR). |
-
----
-
-## 🗺️ 3. Catálogo Detallado de Eventos para Ir a Campo
-
-A continuación se presentan los 12 eventos ordenados cronológicamente desde el más reciente (mayor urgencia de visita) con su enlace directo a GPS / Google Maps:
-
-### 🔴 GRUPO 1: Quemas de Hoy (20 de Agosto de 2026) — *Ir Cuanto Antes*
-
-#### 1. Foco Castillo Grande (Periurbano / Agrícola)
-* **Distrito:** Castillo Grande
-* **Coordenadas:** `-9.2541, -76.0125` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.2541,-76.0125)
-* **Fecha y Hora:** 2026-08-20 | 18:20 UTC (13:20 hora local Perú)
-* **Sensor / Satélite:** VIIRS (NOAA-20 NRT) | Confianza: **Alta (h)**
-* **Potencia Radiativa (FRP):** 19.2 MW | Temp. Brillo: 346.0 K
-* **Observación para Tesis:** Ubicado en la margen derecha del río Huallaga cerca a Tingo María. Ideal para salida inmediata en mototaxi o camioneta.
-
-#### 2. Foco Rupa-Rupa (Sector Oeste)
-* **Distrito:** Rupa-Rupa
-* **Coordenadas:** `-9.1240, -76.1850` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.1240,-76.1850)
-* **Fecha y Hora:** 2026-08-20 | 18:20 UTC (13:20 hora local Perú)
-* **Sensor / Satélite:** VIIRS (Suomi-NPP NRT) | Confianza: **Nominal (n)**
-* **Potencia Radiativa (FRP):** 15.6 MW | Temp. Brillo: 340.2 K
-* **Observación para Tesis:** Sector rural/agrícola al noroeste de Tingo María.
+| Distrito | Focos |
+| :--- | ---: |
+| Mariano Damaso Beraun | 80 |
+| Jose Crespo Y Castillo | 56 |
+| Daniel Alomia Robles | 53 |
+| Rupa-Rupa | 27 |
+| Pucayacu | 19 |
+| Pueblo Nuevo | 17 |
+| Santo Domingo De Anda | 15 |
+| Hermilio Valdizan | 12 |
+| Castillo Grande | 10 |
+| Luyando | 8 |
 
 ---
 
-### 🟠 GRUPO 2: Quemas de Ayer (19 de Agosto de 2026) — *Ventana de 24 Horas*
+## 2. Catálogo de eventos por urgencia
 
-#### 3. Foco Hermilio Valdizán (Alta Intensidad Térmica)
-* **Distrito:** Hermilio Valdizán
-* **Coordenadas:** `-9.3512, -75.7610` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.3512,-75.7610)
-* **Fecha y Hora:** 2026-08-19 | 15:25 UTC (10:25 hora local Perú)
-* **Sensor / Satélite:** MODIS (Aqua NRT) | Confianza: **84%**
-* **Potencia Radiativa (FRP):** **28.4 MW** (Intensidad muy alta) | Temp. Brillo: 328.0 K
-* **Observación para Tesis:** Foco de gran escala detectado por MODIS (pixel 1 km). Verificar si fue roce de purma o quema en plantaciones de café/cacao.
+### URGENCIA MAXIMA — hoy (2026-09-10)
 
-#### 4. Foco Santo Domingo de Anda
-* **Distrito:** Santo Domingo de Anda
-* **Coordenadas:** `-9.0815, -75.8820` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.0815,-75.8820)
-* **Fecha y Hora:** 2026-08-19 | 18:40 UTC (13:40 hora local Perú)
-* **Sensor / Satélite:** VIIRS (NOAA-20 NRT) | Confianza: **Nominal (n)**
-* **Potencia Radiativa (FRP):** 14.8 MW | Temp. Brillo: 339.4 K
-* **Observación para Tesis:** Acceso por la Carretera Fernando Belaúnde Terry (PE-5N) hacia el norte.
+_Detecciones de hoy. Ceniza fresca, limites nitidos de la cicatriz. 3 focos._
 
----
-
-### 🟡 GRUPO 3: Quemas de 2 a 3 Días (17 - 18 de Agosto de 2026)
-
-#### 5. Foco Pucayacu (Norte Provincial)
+#### 1. Foco (Pucayacu)
 * **Distrito:** Pucayacu
-* **Coordenadas:** `-8.7512, -76.1245` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.7512,-76.1245)
-* **Fecha y Hora:** 2026-08-18 | 17:58 UTC (12:58 hora local Perú)
-* **Sensor / Satélite:** VIIRS (Suomi-NPP NRT) | Confianza: **Alta (h)**
-* **Potencia Radiativa (FRP):** 21.0 MW | Temp. Brillo: 350.2 K
+* **Coordenadas:** `-8.71039, -76.10432` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.71039,-76.10432)
+* **Fecha y Hora:** 2026-09-10 | 1843 UTC (13:43 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.68 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 3.96 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
 
-#### 6. Foco Pueblo Nuevo
-* **Distrito:** Pueblo Nuevo
-* **Coordenadas:** `-8.6210, -76.1950` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.6210,-76.1950)
-* **Fecha y Hora:** 2026-08-18 | 17:58 UTC (12:58 hora local Perú)
-* **Sensor / Satélite:** VIIRS (Suomi-NPP NRT) | Confianza: **Nominal (n)**
-* **Potencia Radiativa (FRP):** 11.2 MW | Temp. Brillo: 335.7 K
+#### 2. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.70705, -76.10483` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.70705,-76.10483)
+* **Fecha y Hora:** 2026-09-10 | 1843 UTC (13:43 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.51 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 4.08 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
 
-#### 7. Foco Daniel Alomía Robles (Pumahuasi)
-* **Distrito:** Daniel Alomía Robles
-* **Coordenadas:** `-9.4510, -75.8210` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.4510,-75.8210)
-* **Fecha y Hora:** 2026-08-17 | 18:12 UTC (13:12 hora local Perú)
-* **Sensor / Satélite:** VIIRS (NOAA-20 NRT) | Confianza: **Alta (h)**
-* **Potencia Radiativa (FRP):** 16.5 MW | Temp. Brillo: 344.8 K
-* **Observación para Tesis:** Ruta este hacia Pucallpa por la carretera PE-18A.
+#### 3. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.61127, -76.09893` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.61127,-76.09893)
+* **Fecha y Hora:** 2026-09-10 | 1843 UTC (13:43 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.86 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 9.67 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌧️ Lluvia fuerte (>8mm): Ceniza probablemente lavada
 
----
 
-### 🟢 GRUPO 4: Quemas de 4 a 6 Días (14 - 16 de Agosto de 2026) — *Mapeo de Cicatriz*
+### URGENCIA ALTA — ayer (2026-09-09)
 
-#### 8. Foco Luyando (Naranjillo - Evento de Mayor FRP)
-* **Distrito:** Luyando
-* **Coordenadas:** `-9.1824, -75.9120` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.1824,-75.9120)
-* **Fecha y Hora:** 2026-08-16 | 15:10 UTC (10:10 hora local Perú)
-* **Sensor / Satélite:** MODIS (Terra NRT) | Confianza: **78%**
-* **Potencia Radiativa (FRP):** **32.6 MW** (El más potente del registro) | Temp. Brillo: 324.5 K
-* **Observación para Tesis:** Muy cercano a Tingo María (valle de Naranjillo). Excelente candidato para medir el área total quemada en hectáreas.
+_Ventana de 24 horas. Evidencia aun intacta. 17 focos._
 
-#### 9 y 10. Clúster José Crespo y Castillo (Aucayacu)
-* **Distrito:** José Crespo y Castillo
-* **Punto A:** `-8.9241, -76.0412` (FRP: 24.8 MW, Confianza Alta) ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.9241,-76.0412)
-* **Punto B:** `-8.9180, -76.0350` (FRP: 12.3 MW, Confianza Nominal) ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.9180,-76.0350)
-* **Fecha y Hora:** 2026-08-15 | 17:45 UTC
-* **Sensor / Satélite:** VIIRS (Suomi-NPP NRT)
-* **Observación para Tesis:** Ambos puntos distan menos de 1 km entre sí; corresponden a un mismo frente de quema o predios agrícolas vecinos.
+#### 4. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.80867, -76.09662` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.80867,-76.09662)
+* **Fecha y Hora:** 2026-09-09 | 1843 UTC (13:43 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 11.43 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 0.21 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** 🌧️ Lluvia fuerte (>8mm): Ceniza probablemente lavada
 
-#### 11. Foco Rupa-Rupa (Histórico Inicial)
+#### 5. Foco (Rupa-Rupa)
 * **Distrito:** Rupa-Rupa
-* **Coordenadas:** `-9.2845, -75.9721` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.2845,-75.9721)
-* **Fecha y Hora:** 2026-08-14 | 18:30 UTC
-* **Sensor / Satélite:** VIIRS (NOAA-20 NRT) | FRP: 18.4 MW
+* **Coordenadas:** `-9.29314, -75.99830` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.29314,-75.99830)
+* **Fecha y Hora:** 2026-09-09 | 1843 UTC (13:43 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **baja**
+* **Potencia Radiativa (FRP):** 4.91 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Monzón) a 0.01 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+* **Aviso:** deteccion de baja confianza. Verificar en campo antes de usarla como evidencia; sirve para analisis de omision.
 
-#### 12. Foco Mariano Dámaso Beraún (Las Palmas / Cueva de las Pavas)
-* **Distrito:** Mariano Dámaso Beraún
-* **Coordenadas:** `-9.3120, -75.9450` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.3120,-75.9450)
-* **Fecha y Hora:** 2026-08-14 | 18:30 UTC
-* **Sensor / Satélite:** VIIRS (NOAA-20 NRT) | FRP: 9.7 MW
+#### 6. Foco (Luyando)
+* **Distrito:** Luyando
+* **Coordenadas:** `-9.27156, -75.90054` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.27156,-75.90054)
+* **Fecha y Hora:** 2026-09-09 | 1843 UTC (13:43 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.48 MW
+* **Acceso:** PE-18A (Carretera Federico Basadre (Tingo María - Pumahuasi - Pucallpa)) a 0.73 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 7. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.80931, -76.09333` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.80931,-76.09333)
+* **Fecha y Hora:** 2026-09-09 | 1904 UTC (14:04 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.94 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 0.52 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** 🌧️ Lluvia fuerte (>8mm): Ceniza probablemente lavada
+
+#### 8. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.94988, -76.00188` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.94988,-76.00188)
+* **Fecha y Hora:** 2026-09-09 | 1904 UTC (14:04 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 7.16 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 2.87 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** 🌧️ Lluvia fuerte (>8mm): Ceniza probablemente lavada
+
+#### 9. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.21075, -75.89604` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.21075,-75.89604)
+* **Fecha y Hora:** 2026-09-09 | 1843 UTC (13:43 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.29 MW
+* **Acceso:** VEC-NARANJILLO (Eje Vecinal Luyando - Naranjillo - Bolsón Cuchara) a 1.48 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 10. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.21022, -75.89253` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.21022,-75.89253)
+* **Fecha y Hora:** 2026-09-09 | 1843 UTC (13:43 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.29 MW
+* **Acceso:** VEC-NARANJILLO (Eje Vecinal Luyando - Naranjillo - Bolsón Cuchara) a 1.28 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 11. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.96390, -76.23411` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.96390,-76.23411)
+* **Fecha y Hora:** 2026-09-09 | 1904 UTC (14:04 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 32.28 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Monzón) a 12.96 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 12. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.96492, -76.23495` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.96492,-76.23495)
+* **Fecha y Hora:** 2026-09-09 | 1843 UTC (13:43 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 17.52 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Monzón) a 12.83 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 13. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.96454, -76.23780` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.96454,-76.23780)
+* **Fecha y Hora:** 2026-09-09 | 1904 UTC (14:04 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 14.99 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Monzón) a 12.84 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 14. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.08718, -76.01706` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.08718,-76.01706)
+* **Fecha y Hora:** 2026-09-09 | 1904 UTC (14:04 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.86 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 5.37 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 15. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.43986, -75.78671` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.43986,-75.78671)
+* **Fecha y Hora:** 2026-09-09 | 1843 UTC (13:43 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.74 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 14.35 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 16. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.43836, -75.78861` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.43836,-75.78861)
+* **Fecha y Hora:** 2026-09-09 | 1904 UTC (14:04 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.8 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 14.2 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 17. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.40927, -75.77290` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.40927,-75.77290)
+* **Fecha y Hora:** 2026-09-09 | 1904 UTC (14:04 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.46 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 16.77 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 18. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.43778, -75.78784` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.43778,-75.78784)
+* **Fecha y Hora:** 2026-09-09 | 1843 UTC (13:43 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.03 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 14.29 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 19. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.19933, -76.19073` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.19933,-76.19073)
+* **Fecha y Hora:** 2026-09-09 | 1904 UTC (14:04 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.26 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Monzón) a 5.24 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 20. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.41038, -75.77236` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.41038,-75.77236)
+* **Fecha y Hora:** 2026-09-09 | 1904 UTC (14:04 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.19 MW
+* **Acceso:** PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)) a 16.79 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+
+### SEGUIMIENTO — hace 7 días (2026-09-03)
+
+_4 a 6 dias. Validacion de cicatriz y calculo de severidad retrospectiva. 9 focos._
+
+#### 21. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.84103, -76.10767` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.84103,-76.10767)
+* **Fecha y Hora:** 2026-09-03 | 1856 UTC (13:56 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 11.28 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 2.33 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 22. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.83339, -76.10498` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.83339,-76.10498)
+* **Fecha y Hora:** 2026-09-03 | 1856 UTC (13:56 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.8 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.72 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 23. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.29367, -75.91909` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.29367,-75.91909)
+* **Fecha y Hora:** 2026-09-03 | 1856 UTC (13:56 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.98 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 2.2 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 24. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.29041, -75.91850` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.29041,-75.91850)
+* **Fecha y Hora:** 2026-09-03 | 1856 UTC (13:56 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.67 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 1.89 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 25. Foco (Luyando)
+* **Distrito:** Luyando
+* **Coordenadas:** `-9.24449, -75.97012` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.24449,-75.97012)
+* **Fecha y Hora:** 2026-09-03 | 1856 UTC (13:56 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.6 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.08 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 26. Foco (Luyando)
+* **Distrito:** Luyando
+* **Coordenadas:** `-9.26335, -75.94128` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.26335,-75.94128)
+* **Fecha y Hora:** 2026-09-03 | 1917 UTC (14:17 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 1.16 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 1.84 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 27. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.09052, -75.99908` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.09052,-75.99908)
+* **Fecha y Hora:** 2026-09-03 | 1856 UTC (13:56 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 13.13 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.83 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 28. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.09024, -75.99904` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.09024,-75.99904)
+* **Fecha y Hora:** 2026-09-03 | 1856 UTC (13:56 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 12.88 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.81 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 29. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.91552, -76.13910` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.91552,-76.13910)
+* **Fecha y Hora:** 2026-09-03 | 1917 UTC (14:17 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.54 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 9.13 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+
+### SEGUIMIENTO — hace 8 días (2026-09-02)
+
+_4 a 6 dias. Validacion de cicatriz y calculo de severidad retrospectiva. 10 focos._
+
+#### 30. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.42040, -75.92717` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.42040,-75.92717)
+* **Fecha y Hora:** 2026-09-02 | 1915 UTC (14:15 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.8 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.35 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 31. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.86006, -76.08292` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.86006,-76.08292)
+* **Fecha y Hora:** 2026-09-02 | 1915 UTC (14:15 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.11 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.82 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 32. Foco (Castillo Grande)
+* **Distrito:** Castillo Grande
+* **Coordenadas:** `-9.18134, -76.04121` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.18134,-76.04121)
+* **Fecha y Hora:** 2026-09-02 | 1915 UTC (14:15 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.36 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 7.04 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 33. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.85535, -76.21706` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.85535,-76.21706)
+* **Fecha y Hora:** 2026-09-02 | 1934 UTC (14:34 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 7.16 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 13.99 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 34. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.37496, -76.03550` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.37496,-76.03550)
+* **Fecha y Hora:** 2026-09-02 | 1915 UTC (14:15 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.25 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 8.69 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 35. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.85646, -76.21750` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.85646,-76.21750)
+* **Fecha y Hora:** 2026-09-02 | 1934 UTC (14:34 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.93 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 14.09 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 36. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.37723, -76.03630` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.37723,-76.03630)
+* **Fecha y Hora:** 2026-09-02 | 1915 UTC (14:15 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.58 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 8.88 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 37. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.35005, -75.86292` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35005,-75.86292)
+* **Fecha y Hora:** 2026-09-02 | 1915 UTC (14:15 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.91 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 9.6 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 38. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.02063, -76.13690` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.02063,-76.13690)
+* **Fecha y Hora:** 2026-09-02 | 1915 UTC (14:15 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.29 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 13.27 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 39. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.35126, -75.81110` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35126,-75.81110)
+* **Fecha y Hora:** 2026-09-02 | 1915 UTC (14:15 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.86 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 10.7 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+
+### SEGUIMIENTO — hace 9 días (2026-09-01)
+
+_4 a 6 dias. Validacion de cicatriz y calculo de severidad retrospectiva. 25 focos._
+
+#### 40. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.91492, -76.04077` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.91492,-76.04077)
+* **Fecha y Hora:** 2026-09-01 | 1754 UTC (12:54 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.74 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.49 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 41. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.13215, -76.18892` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.13215,-76.18892)
+* **Fecha y Hora:** 2026-09-01 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.95 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 0.34 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 42. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.18227, -76.14763` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.18227,-76.14763)
+* **Fecha y Hora:** 2026-09-01 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 1.61 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 0.63 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 43. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.93629, -76.02128` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.93629,-76.02128)
+* **Fecha y Hora:** 2026-09-01 | 1813 UTC (13:13 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 21.08 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.48 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 44. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.16422, -76.18784` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.16422,-76.18784)
+* **Fecha y Hora:** 2026-09-01 | 1934 UTC (14:34 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.57 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 2.17 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 45. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.16191, -76.18832` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.16191,-76.18832)
+* **Fecha y Hora:** 2026-09-01 | 1934 UTC (14:34 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 9.97 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 2.02 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 46. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.33681, -75.94883` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.33681,-75.94883)
+* **Fecha y Hora:** 2026-09-01 | 1754 UTC (12:54 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.8 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.72 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 47. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.45640, -75.76743` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.45640,-75.76743)
+* **Fecha y Hora:** 2026-09-01 | 1934 UTC (14:34 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **alta**
+* **Potencia Radiativa (FRP):** 27.24 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 15.85 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 48. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.96399, -76.08685` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.96399,-76.08685)
+* **Fecha y Hora:** 2026-09-01 | 1813 UTC (13:13 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 18.39 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 6.35 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 49. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.45721, -75.77161` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.45721,-75.77161)
+* **Fecha y Hora:** 2026-09-01 | 1934 UTC (14:34 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 14.71 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 15.39 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌧️ Lluvia fuerte (>8mm): Ceniza probablemente lavada
+
+#### 50. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32683, -75.86610` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32683,-75.86610)
+* **Fecha y Hora:** 2026-09-01 | 1754 UTC (12:54 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 11.68 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 7.56 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 51. Foco (Luyando)
+* **Distrito:** Luyando
+* **Coordenadas:** `-9.32633, -75.86196` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32633,-75.86196)
+* **Fecha y Hora:** 2026-09-01 | 1754 UTC (12:54 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 11.68 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 7.54 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 52. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.37826, -75.82830` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.37826,-75.82830)
+* **Fecha y Hora:** 2026-09-01 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **alta**
+* **Potencia Radiativa (FRP):** 11.1 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 12.14 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 53. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.47115, -75.77483` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.47115,-75.77483)
+* **Fecha y Hora:** 2026-09-01 | 1934 UTC (14:34 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 11.04 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 14.61 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 54. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.47054, -75.77165` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.47054,-75.77165)
+* **Fecha y Hora:** 2026-09-01 | 1934 UTC (14:34 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 11.04 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 14.96 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌧️ Lluvia fuerte (>8mm): Ceniza probablemente lavada
+
+#### 55. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.35296, -75.92319` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35296,-75.92319)
+* **Fecha y Hora:** 2026-09-01 | 1934 UTC (14:34 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.48 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.46 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 56. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.96448, -76.08878` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.96448,-76.08878)
+* **Fecha y Hora:** 2026-09-01 | 1813 UTC (13:13 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.43 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 6.57 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 57. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.96385, -76.08396` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.96385,-76.08396)
+* **Fecha y Hora:** 2026-09-01 | 1813 UTC (13:13 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.43 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 6.05 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 58. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.37378, -75.82918` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.37378,-75.82918)
+* **Fecha y Hora:** 2026-09-01 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 9.28 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 12.22 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 59. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.35226, -75.92466` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35226,-75.92466)
+* **Fecha y Hora:** 2026-09-01 | 1934 UTC (14:34 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.52 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.35 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 60. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32269, -76.06812` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32269,-76.06812)
+* **Fecha y Hora:** 2026-09-01 | 1754 UTC (12:54 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.44 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 7.48 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 61. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.44646, -76.09572` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.44646,-76.09572)
+* **Fecha y Hora:** 2026-09-01 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.94 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 18.05 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 62. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.90324, -76.11961` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.90324,-76.11961)
+* **Fecha y Hora:** 2026-09-01 | 1813 UTC (13:13 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.34 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 6.61 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 63. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.40346, -75.73738` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.40346,-75.73738)
+* **Fecha y Hora:** 2026-09-01 | 1934 UTC (14:34 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.6 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 18.81 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 64. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32537, -76.06895` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32537,-76.06895)
+* **Fecha y Hora:** 2026-09-01 | 1754 UTC (12:54 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.49 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 7.77 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+
+### SEGUIMIENTO — hace 10 días (2026-08-31)
+
+_4 a 6 dias. Validacion de cicatriz y calculo de severidad retrospectiva. 37 focos._
+
+#### 65. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.43919, -75.93286` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.43919,-75.93286)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 11.93 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.93 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 66. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.43887, -75.93053` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.43887,-75.93053)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.06 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.68 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 67. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.40896, -75.94243` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.40896,-75.94243)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.2 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.8 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 68. Foco (Luyando)
+* **Distrito:** Luyando
+* **Coordenadas:** `-9.27863, -75.93452` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.27863,-75.93452)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.29 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 0.01 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 69. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.10371, -76.22221` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.10371,-76.22221)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.28 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 0.16 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 70. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.19044, -76.12311` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.19044,-76.12311)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.85 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 0.54 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 71. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.43970, -75.93691` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.43970,-75.93691)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **alta**
+* **Potencia Radiativa (FRP):** 13.37 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.37 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 72. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.79816, -76.09136` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.79816,-76.09136)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.28 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.21 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 73. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.13235, -75.93786` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.13235,-75.93786)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.37 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.07 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 74. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.13183, -75.93793` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.13183,-75.93793)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.5 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.08 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 75. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.43976, -75.93669` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.43976,-75.93669)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.39 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.35 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 76. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.86477, -76.09403` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.86477,-76.09403)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.02 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 2.15 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 77. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.35243, -75.79583` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35243,-75.79583)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 21.34 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 11.12 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 78. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.46080, -76.17504` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.46080,-76.17504)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.56 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 26.62 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 79. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.41921, -75.96430` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.41921,-75.96430)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 9.2 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.45 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 80. Foco (Castillo Grande)
+* **Distrito:** Castillo Grande
+* **Coordenadas:** `-9.19752, -76.04926` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.19752,-76.04926)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.38 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 5.09 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 81. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.31688, -76.10101` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.31688,-76.10101)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.35 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 8.96 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 82. Foco (Castillo Grande)
+* **Distrito:** Castillo Grande
+* **Coordenadas:** `-9.15523, -76.05095` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.15523,-76.05095)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.21 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 8.61 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 83. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.35099, -75.79718` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35099,-75.79718)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **alta**
+* **Potencia Radiativa (FRP):** 6.0 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 10.93 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 84. Foco (Castillo Grande)
+* **Distrito:** Castillo Grande
+* **Coordenadas:** `-9.19795, -76.05245` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.19795,-76.05245)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.83 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 4.83 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 85. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.19708, -76.19316` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.19708,-76.19316)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.47 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 5.23 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 86. Foco (Castillo Grande)
+* **Distrito:** Castillo Grande
+* **Coordenadas:** `-9.23913, -76.02215` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.23913,-76.02215)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.44 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 3.01 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 87. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.30705, -75.91267` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.30705,-75.91267)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.16 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 3.83 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 88. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.18407, -75.88738` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.18407,-75.88738)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.11 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 4.91 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 89. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.40902, -75.75294` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.40902,-75.75294)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.99 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 18.6 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 90. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.92471, -76.19695` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.92471,-76.19695)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.9 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 15.25 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 91. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.79636, -76.15792` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.79636,-76.15792)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.6 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 5.43 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 92. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.30885, -75.91330` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.30885,-75.91330)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.5 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 3.99 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 93. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.92435, -76.19591` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.92435,-76.19591)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.48 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 15.13 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 94. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.31655, -76.10015` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.31655,-76.10015)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.46 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 8.87 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 95. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.34835, -75.84008` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.34835,-75.84008)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.39 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 10.14 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 96. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.08133, -76.19016` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.08133,-76.19016)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.07 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 4.37 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 97. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.18322, -76.37617` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.18322,-76.37617)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.53 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 17.96 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 98. Foco (Castillo Grande)
+* **Distrito:** Castillo Grande
+* **Coordenadas:** `-9.23794, -76.02387` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.23794,-76.02387)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.46 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 3.01 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 99. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.92941, -76.19749` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.92941,-76.19749)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.28 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 15.54 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 100. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.10392, -76.05466` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.10392,-76.05466)
+* **Fecha y Hora:** 2026-08-31 | 1832 UTC (13:32 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.04 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 9.88 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 101. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32056, -75.88251` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32056,-75.88251)
+* **Fecha y Hora:** 2026-08-31 | 1811 UTC (13:11 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.03 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 6.49 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+
+### SEGUIMIENTO — hace 12 días (2026-08-29)
+
+_4 a 6 dias. Validacion de cicatriz y calculo de severidad retrospectiva. 98 focos._
+
+#### 102. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.09171, -76.24008` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.09171,-76.24008)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 21.76 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 0.21 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 103. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.09116, -76.24392` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.09116,-76.24392)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 18.23 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 0.45 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 104. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.24058, -76.06830` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.24058,-76.06830)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 7.64 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 0.05 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 105. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.39440, -75.94389` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.39440,-75.94389)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.09 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.42 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 106. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.97068, -76.02373` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.97068,-76.02373)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.25 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.23 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 107. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.34858, -75.95838` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.34858,-75.95838)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.01 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.2 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 108. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.35194, -75.95788` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35194,-75.95788)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.58 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.09 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 109. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.38434, -75.94544` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.38434,-75.94544)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.52 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.21 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 110. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.31880, -75.97813` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.31880,-75.97813)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.2 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.1 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 111. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.41230, -75.92648` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.41230,-75.92648)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 1.8 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.72 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 112. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.42200, -75.94918` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.42200,-75.94918)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 35.25 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.99 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 113. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.30596, -75.96179` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.30596,-75.96179)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 21.95 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 1.99 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 114. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-9.03699, -75.97665` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.03699,-75.97665)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 15.51 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.24 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 115. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.35983, -75.92619` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35983,-75.92619)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 12.96 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 2.83 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 116. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.81249, -76.11095` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.81249,-76.11095)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 7.28 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.4 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 117. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.06445, -76.26270` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.06445,-76.26270)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.83 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 2.21 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 118. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.37701, -75.96456` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.37701,-75.96456)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.8 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.79 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 119. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.31196, -75.96620` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.31196,-75.96620)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.71 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.4 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 120. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.40695, -75.94611` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.40695,-75.94611)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.29 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.11 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 121. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.38597, -75.95592` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.38597,-75.95592)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.61 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.35 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 122. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.35745, -75.97126` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35745,-75.97126)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.25 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.5 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 123. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.36094, -75.92753` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.36094,-75.92753)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.24 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 2.65 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 124. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.21786, -76.06728` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.21786,-76.06728)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.77 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 2.09 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 125. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.73263, -76.10530` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.73263,-76.10530)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 1.6 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 2.75 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 126. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.16524, -76.19183` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.16524,-76.19183)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 1.49 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 2.56 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 127. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.95842, -75.98907` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.95842,-75.98907)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **alta**
+* **Potencia Radiativa (FRP):** 175.37 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.81 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 128. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.35208, -75.73869` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35208,-75.73869)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 81.17 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 14.01 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 129. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.95646, -75.98595` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.95646,-75.98595)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 79.8 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 4.21 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 130. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.35099, -75.73902` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35099,-75.73902)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 47.31 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 13.9 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 131. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.34088, -75.73317` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.34088,-75.73317)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 47.17 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 13.39 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 132. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.34055, -75.73557` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.34055,-75.73557)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 39.29 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 13.2 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 133. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.34871, -75.73916` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.34871,-75.73916)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 25.7 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 13.69 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 134. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.39848, -75.83754` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.39848,-75.83754)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 24.98 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 10.44 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 135. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.40772, -75.78295` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.40772,-75.78295)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 20.8 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 15.76 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 136. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.38901, -75.86517` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.38901,-75.86517)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 20.58 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 7.93 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 137. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.38566, -75.86570` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.38566,-75.86570)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 20.58 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 8.0 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 138. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.05341, -76.27275` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.05341,-76.27275)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 18.75 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 3.86 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 139. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.05417, -76.27531` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.05417,-76.27531)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 18.42 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 3.99 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 140. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.05083, -76.27581` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.05083,-76.27581)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 18.42 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 4.3 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 141. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.40802, -75.78062` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.40802,-75.78062)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 18.05 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 16.0 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 142. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.14305, -76.11545` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.14305,-76.11545)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 14.3 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 4.95 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 143. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.14026, -76.11955` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.14026,-76.11955)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 14.3 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 4.87 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 144. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.13970, -76.11596` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.13970,-76.11596)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 14.3 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 5.19 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 145. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.37264, -76.05214` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.37264,-76.05214)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 13.21 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 10.17 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 146. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.14300, -76.11511` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.14300,-76.11511)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 12.71 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 4.98 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 147. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.14116, -76.11903` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.14116,-76.11903)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 12.62 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 4.84 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 148. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.13467, -76.06197` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.13467,-76.06197)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 11.75 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 9.63 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 149. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.40353, -75.78134` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.40353,-75.78134)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.59 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 16.07 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 150. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32449, -75.92621` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32449,-75.92621)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.41 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 4.55 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 151. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.04935, -76.27081` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.04935,-76.27081)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.11 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 4.09 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 152. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.44789, -75.77081` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.44789,-75.77081)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.07 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 15.77 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 153. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.37364, -76.05295` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.37364,-76.05295)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 9.78 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 10.31 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 154. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.38179, -75.74665` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.38179,-75.74665)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.93 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 16.22 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 155. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.95505, -75.98952` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.95505,-75.98952)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.88 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.91 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 156. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.35903, -76.12684` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35903,-76.12684)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.5 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 14.41 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 157. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.45021, -76.08392` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.45021,-76.08392)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.1 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 16.97 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 158. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.96140, -75.98634` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.96140,-75.98634)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.08 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.96 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 159. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.22550, -75.86480` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.22550,-75.86480)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.04 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 3.6 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 160. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.38823, -75.86701` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.38823,-75.86701)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 7.78 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 7.77 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 161. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.29780, -75.85699` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.29780,-75.85699)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 7.53 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 4.43 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 162. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.35733, -76.12736` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35733,-76.12736)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 7.35 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 14.28 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 163. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.05491, -76.27549` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.05491,-76.27549)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.81 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 3.94 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 164. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.05021, -76.27579` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.05021,-76.27579)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.81 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 4.35 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 165. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.35786, -76.12762` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35786,-76.12762)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.77 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 14.35 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 166. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.36607, -75.85026` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.36607,-75.85026)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.31 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 10.32 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 167. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.31167, -75.83260` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.31167,-75.83260)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.9 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 6.16 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 168. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.95896, -75.99259` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.95896,-75.99259)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.81 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.43 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 169. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.00886, -76.13704` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.00886,-76.13704)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.49 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 13.35 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 170. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.45001, -75.76892` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.45001,-75.76892)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.28 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 15.9 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 171. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.39378, -76.02813` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.39378,-76.02813)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.08 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 8.87 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 172. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.11448, -76.07593` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.11448,-76.07593)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.89 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 10.23 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 173. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.31466, -75.92603` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.31466,-75.92603)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.78 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 4.04 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 174. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.35206, -76.14189` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35206,-76.14189)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.72 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 14.69 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 175. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.22610, -75.86557` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.22610,-75.86557)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.58 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 3.54 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 176. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.36194, -76.07291` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.36194,-76.07291)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.52 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 11.13 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 177. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.40347, -75.72947` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.40347,-75.72947)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.43 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 19.25 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 178. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.43052, -75.74787` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.43052,-75.74787)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.34 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 18.73 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 179. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.38452, -75.74776` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.38452,-75.74776)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.16 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 16.43 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 180. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.38116, -75.74831` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.38116,-75.74831)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.16 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 16.07 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 181. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.37028, -76.05340` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.37028,-76.05340)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.88 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 10.11 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 182. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.36397, -76.07201` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.36397,-76.07201)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.85 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 11.23 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 183. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.94962, -76.21901` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.94962,-76.21901)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.78 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 14.81 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 184. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.36777, -75.72873` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.36777,-75.72873)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.71 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 16.06 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 185. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.89234, -76.21748` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.89234,-76.21748)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.69 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 15.67 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 186. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.44712, -76.08488` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.44712,-76.08488)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.32 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 16.96 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 187. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.11492, -76.08034` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.11492,-76.08034)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.17 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 9.86 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 188. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.89820, -76.10036` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.89820,-76.10036)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.99 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 4.47 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 189. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.98086, -75.97873` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.98086,-75.97873)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.91 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.9 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 190. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.75542, -76.16344` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.75542,-76.16344)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.85 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 4.09 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 191. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.17175, -76.42636` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.17175,-76.42636)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.69 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 21.88 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 192. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.31444, -75.92785` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.31444,-75.92785)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.67 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 3.94 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 193. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.30155, -75.91116` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.30155,-75.91116)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.67 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 3.34 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 194. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.82119, -76.18946` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.82119,-76.18946)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.61 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 9.7 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 195. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.95404, -75.93890` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.95404,-75.93890)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.58 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 9.09 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 196. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.09153, -76.04018` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.09153,-76.04018)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.57 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 7.82 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 197. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.19583, -76.19045` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.19583,-76.19045)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.46 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 4.93 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 198. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.08113, -76.13293` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.08113,-76.13293)
+* **Fecha y Hora:** 2026-08-29 | 1910 UTC (14:10 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.44 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 8.66 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 199. Foco (Castillo Grande)
+* **Distrito:** Castillo Grande
+* **Coordenadas:** `-9.16705, -76.07148` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.16705,-76.07148)
+* **Fecha y Hora:** 2026-08-29 | 1849 UTC (13:49 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.06 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 6.18 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+
+### SEGUIMIENTO — hace 13 días (2026-08-28)
+
+_4 a 6 dias. Validacion de cicatriz y calculo de severidad retrospectiva. 71 focos._
+
+#### 200. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32356, -75.96553` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32356,-75.96553)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 28.34 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.71 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 201. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32571, -75.96201` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32571,-75.96201)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **alta**
+* **Potencia Radiativa (FRP):** 11.44 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.95 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 202. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.11046, -75.96011` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.11046,-75.96011)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **alta**
+* **Potencia Radiativa (FRP):** 11.22 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.52 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 203. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.11008, -75.96370` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.11008,-75.96370)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.72 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.88 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 204. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32473, -75.96463` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32473,-75.96463)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 9.82 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.74 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 205. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.10909, -75.95847` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.10909,-75.95847)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.53 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.3 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 206. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.44321, -75.92957` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.44321,-75.92957)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.37 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.74 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 207. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.11133, -75.96391` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.11133,-75.96391)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.84 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.95 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 208. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.10709, -75.96457` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.10709,-75.96457)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.84 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.87 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 209. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32302, -75.96235` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32302,-75.96235)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 28.34 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.05 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 210. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.15287, -75.95228` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.15287,-75.95228)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 14.84 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.14 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 211. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.38657, -75.95362` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.38657,-75.95362)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 13.07 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.14 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 212. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32408, -75.96120` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32408,-75.96120)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.43 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.11 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 213. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.15351, -75.95609` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.15351,-75.95609)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 7.91 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.56 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 214. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.38718, -75.95724` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.38718,-75.95724)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.67 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.53 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 215. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.73977, -76.11404` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.73977,-76.11404)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.85 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.54 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 216. Foco (Castillo Grande)
+* **Distrito:** Castillo Grande
+* **Coordenadas:** `-9.23272, -76.03947` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.23272,-76.03947)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.03 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 2.54 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 217. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-9.02550, -76.01548` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.02550,-76.01548)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.03 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 1.85 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 218. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.45287, -75.72956` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.45287,-75.72956)
+* **Fecha y Hora:** 2026-08-28 | 1747 UTC (12:47 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 101.47 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 19.95 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 219. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.44741, -75.72830` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.44741,-75.72830)
+* **Fecha y Hora:** 2026-08-28 | 1747 UTC (12:47 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 45.73 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 20.26 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 220. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.44692, -75.72419` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.44692,-75.72419)
+* **Fecha y Hora:** 2026-08-28 | 1747 UTC (12:47 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 45.73 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 20.7 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 221. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.45436, -75.72873` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.45436,-75.72873)
+* **Fecha y Hora:** 2026-08-28 | 1747 UTC (12:47 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **alta**
+* **Potencia Radiativa (FRP):** 24.13 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 19.99 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 222. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.49979, -75.72202` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.49979,-75.72202)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 17.06 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 19.26 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 223. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32523, -75.92498` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32523,-75.92498)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 16.81 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 4.63 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 224. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.49939, -75.71914` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.49939,-75.71914)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 15.69 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 19.58 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 225. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.49761, -75.72188` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.49761,-75.72188)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 15.23 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 19.34 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 226. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.95215, -75.93893` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.95215,-75.93893)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 14.29 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 9.17 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 227. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.98087, -76.23719` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.98087,-76.23719)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 13.37 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 11.05 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 228. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.32460, -75.92264` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.32460,-75.92264)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.96 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 4.89 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 229. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.87896, -76.22099` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.87896,-76.22099)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.8 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 15.43 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 230. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.47518, -76.12441` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.47518,-76.12441)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.11 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 22.08 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 231. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.70453, -76.08551` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.70453,-76.08551)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.06 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 6.1 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 232. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.49247, -75.71869` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.49247,-75.71869)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.02 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 19.84 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 233. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.49332, -75.72243` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.49332,-75.72243)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 9.83 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 19.42 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 234. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.33059, -75.92561` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.33059,-75.92561)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 9.53 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 4.31 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 235. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.49286, -75.71998` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.49286,-75.71998)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 9.05 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 19.69 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 236. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.47172, -76.12464` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.47172,-76.12464)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 9.01 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 21.98 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 237. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.06807, -76.21391` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.06807,-76.21391)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.54 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 3.67 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 238. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.53922, -75.75949` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.53922,-75.75949)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.46 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 14.38 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 239. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.44394, -75.78151` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.44394,-75.78151)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 8.32 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 14.77 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 240. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.11660, -76.07367` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.11660,-76.07367)
+* **Fecha y Hora:** 2026-08-28 | 1747 UTC (12:47 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.9 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 10.22 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 241. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.44835, -75.73019` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.44835,-75.73019)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.8 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 20.03 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 242. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.98247, -76.23811` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.98247,-76.23811)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.71 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 10.86 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 243. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.98569, -76.24043` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.98569,-76.24043)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.6 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 10.48 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 244. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.98148, -76.24078` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.98148,-76.24078)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.6 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 10.94 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 245. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.70406, -76.08524` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.70406,-76.08524)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.57 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 6.15 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 246. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.70505, -76.08435` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.70505,-76.08435)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.4 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 6.19 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 247. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.95642, -75.93841` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.95642,-75.93841)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.69 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 9.04 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 248. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.17520, -75.84395` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.17520,-75.84395)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.62 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 8.56 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 249. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-8.95815, -75.93889` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.95815,-75.93889)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.62 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 8.91 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 250. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.73243, -76.09634` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.73243,-76.09634)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.32 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.64 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 251. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.17443, -75.84337` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.17443,-75.84337)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.14 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 8.59 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 252. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.06874, -76.21780` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.06874,-76.21780)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.99 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 3.32 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 253. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.39996, -75.73009` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.39996,-75.73009)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.95 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 18.88 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 254. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.11082, -76.10715` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.11082,-76.10715)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.91 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 8.19 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 255. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.43686, -75.74011` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.43686,-75.74011)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.9 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 19.35 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 256. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.45634, -75.77714` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.45634,-75.77714)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.65 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 14.83 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 257. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.33576, -76.14681` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.33576,-76.14681)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.6 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 13.54 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 258. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.96561, -76.08178` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.96561,-76.08178)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.44 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 5.91 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 259. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.73305, -76.09996` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.73305,-76.09996)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.55 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.26 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 260. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.33541, -75.83212` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.33541,-75.83212)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.52 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 8.78 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 261. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.08633, -76.01581` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.08633,-76.01581)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.4 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 5.2 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 262. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.77122, -76.17226` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.77122,-76.17226)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.34 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 5.75 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 263. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.61075, -76.09112` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.61075,-76.09112)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.33 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 10.44 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 264. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.07108, -76.05396` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.07108,-76.05396)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.29 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 8.02 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 265. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.44429, -75.78065` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.44429,-75.78065)
+* **Fecha y Hora:** 2026-08-28 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.14 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 14.85 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 266. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.91026, -76.10118` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.91026,-76.10118)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.09 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 5.17 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 267. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.47263, -76.12549` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.47263,-76.12549)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.03 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 22.1 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 268. Foco (Castillo Grande)
+* **Distrito:** Castillo Grande
+* **Coordenadas:** `-9.14402, -76.05302` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.14402,-76.05302)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.14 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 9.44 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 269. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.11027, -76.10735` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.11027,-76.10735)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.12 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 8.22 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 270. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.35118, -75.79621` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.35118,-75.79621)
+* **Fecha y Hora:** 2026-08-28 | 1908 UTC (14:08 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.1 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 10.98 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+
+### SEGUIMIENTO — hace 14 días (2026-08-27)
+
+_4 a 6 dias. Validacion de cicatriz y calculo de severidad retrospectiva. 26 focos._
+
+#### 271. Foco (Hermilio Valdizan)
+* **Distrito:** Hermilio Valdizan
+* **Coordenadas:** `-9.13532, -75.94806` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.13532,-75.94806)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **alta**
+* **Potencia Radiativa (FRP):** 10.17 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.1 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 272. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.83786, -76.07875` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.83786,-76.07875)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.09 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 0.72 km (ALTA) | Costo estimado: S/. 5 - 10
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 273. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.76253, -76.09096` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.76253,-76.09096)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.25 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 2.82 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 274. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.93267, -76.01251` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.93267,-76.01251)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.22 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 2.52 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** 🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa
+
+#### 275. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.30216, -75.95809` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.30216,-75.95809)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.23 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 1.66 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 276. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.01011, -76.13925` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.01011,-76.13925)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **alta**
+* **Potencia Radiativa (FRP):** 15.54 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 13.63 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 277. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.34081, -75.82124` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.34081,-75.82124)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.76 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 9.46 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 278. Foco (Daniel Alomia Robles)
+* **Distrito:** Daniel Alomia Robles
+* **Coordenadas:** `-9.34037, -75.81797` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.34037,-75.81797)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 10.76 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 9.44 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 279. Foco (Luyando)
+* **Distrito:** Luyando
+* **Coordenadas:** `-9.20760, -75.98312` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.20760,-75.98312)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.65 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 4.02 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 280. Foco (Luyando)
+* **Distrito:** Luyando
+* **Coordenadas:** `-9.20740, -75.98125` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.20740,-75.98125)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 6.42 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.84 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 281. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.34225, -76.03427` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.34225,-76.03427)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.88 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 6.54 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 282. Foco (Luyando)
+* **Distrito:** Luyando
+* **Coordenadas:** `-9.29144, -75.87516` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.29144,-75.87516)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 5.55 MW
+* **Acceso:** PE-18A (Federico Basadre (Tingo María - Pumahuasi - San Alejandro)) a 3.59 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 283. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.95385, -76.15802` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.95385,-76.15802)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 4.05 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 12.94 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 284. Foco (Santo Domingo De Anda)
+* **Distrito:** Santo Domingo De Anda
+* **Coordenadas:** `-9.04455, -76.04559` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.04455,-76.04559)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.91 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 5.77 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 285. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-9.04752, -76.18555` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.04752,-76.18555)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.74 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 7.45 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 286. Foco (Castillo Grande)
+* **Distrito:** Castillo Grande
+* **Coordenadas:** `-9.23417, -76.02866` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.23417,-76.02866)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 3.38 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 3.07 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 287. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.37733, -76.13499` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.37733,-76.13499)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.97 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 16.59 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 288. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.03464, -76.10998` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.03464,-76.10998)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.94 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 11.7 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 289. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.08816, -76.01263` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.08816,-76.01263)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.85 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 5.0 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 290. Foco (Rupa-Rupa)
+* **Distrito:** Rupa-Rupa
+* **Coordenadas:** `-9.11395, -76.15672` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.11395,-76.15672)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.2 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 4.23 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 291. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.36164, -76.05582` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.36164,-76.05582)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.14 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 9.73 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 292. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.95269, -76.16039` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.95269,-76.16039)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.09 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 13.11 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 293. Foco (Pucayacu)
+* **Distrito:** Pucayacu
+* **Coordenadas:** `-8.82567, -76.12645` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.82567,-76.12645)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.02 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 3.55 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 294. Foco (Pueblo Nuevo)
+* **Distrito:** Pueblo Nuevo
+* **Coordenadas:** `-9.06656, -76.13232` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.06656,-76.13232)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 2.01 MW
+* **Acceso:** HU-104 (Carretera Departamental Tingo María - Valle del Monzón) a 9.89 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** Sin datos meteorológicos
+
+#### 295. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.83089, -76.20090` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.83089,-76.20090)
+* **Fecha y Hora:** 2026-08-27 | 1928 UTC (14:28 hora local Peru)
+* **Sensor:** VIIRS_SNPP_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 1.23 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 11.28 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+#### 296. Foco (Jose Crespo Y Castillo)
+* **Distrito:** Jose Crespo Y Castillo
+* **Coordenadas:** `-8.83031, -76.20076` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-8.83031,-76.20076)
+* **Fecha y Hora:** 2026-08-27 | 1806 UTC (13:06 hora local Peru)
+* **Sensor:** VIIRS_NOAA20_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 0.88 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 11.24 km (BAJA / REMOTA) | Costo estimado: S/. 40 - 80+
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
+
+### SEGUIMIENTO — hace 18 días (2026-08-23)
+
+_4 a 6 dias. Validacion de cicatriz y calculo de severidad retrospectiva. 1 focos._
+
+#### 297. Foco (Mariano Damaso Beraun)
+* **Distrito:** Mariano Damaso Beraun
+* **Coordenadas:** `-9.38742, -75.96612` ➡️ [Abrir en Google Maps](https://www.google.com/maps?q=-9.38742,-75.96612)
+* **Fecha y Hora:** 2026-08-23 | 2034 UTC (15:34 hora local Peru)
+* **Sensor:** MODIS_NRT | Confianza: **nominal**
+* **Potencia Radiativa (FRP):** 12.45 MW
+* **Acceso:** PE-5N (Longitudinal Selva Norte (Tingo María - Aucayacu - Pucayacu)) a 2.44 km (MEDIA) | Costo estimado: S/. 15 - 30
+* **Clima 24 h:** ☀️ Seco (<2mm): Evidencia intacta para muestreo
+
 
 ---
 
-## 🚗 4. Circuitos Logísticos Recomendados para Salidas desde Tingo María
+## 3. Circuitos logísticos sugeridos
 
-Para optimizar tiempo y combustible en tu trabajo de campo de tesis:
+Agrupa los focos por corredor vial y fecha para minimizar traslados:
 
-```mermaid
-graph TD
-    TM[Base: Tingo María] --> R1[Circuito 1: Inmediato Local]
-    TM --> R2[Circuito 2: Corredor Norte PE-5N]
-    TM --> R3[Circuito 3: Corredor Sur-Este PE-18A]
-
-    R1 --> C1[Castillo Grande 20-Ago]
-    R1 --> C2[Rupa-Rupa 20-Ago & 14-Ago]
-    R1 --> C3[Luyando / Naranjillo 16-Ago]
-
-    R2 --> N1[Santo Domingo de Anda 19-Ago]
-    R2 --> N2[Aucayacu 15-Ago]
-    R2 --> N3[Pucayacu 18-Ago]
-    R2 --> N4[Pueblo Nuevo 18-Ago]
-
-    R3 --> S1[Mariano Dámaso Beraún 14-Ago]
-    R3 --> S2[Daniel Alomía Robles 17-Ago]
-    R3 --> S3[Hermilio Valdizán 19-Ago]
-```
+| Corredor | Focos | Distrito(s) |
+| :--- | ---: | :--- |
+| HU-104 | 5 | Jose Crespo Y Castillo, Rupa-Rupa |
+| HU-104 | 68 | Castillo Grande, Jose Crespo Y Castillo, Mariano Damaso Beraun |
+| PE-18A | 1 | Luyando |
+| PE-18A | 42 | Daniel Alomia Robles, Hermilio Valdizan, Luyando |
+| PE-5N | 12 | Daniel Alomia Robles, Pucayacu, Pueblo Nuevo |
+| PE-5N | 167 | Daniel Alomia Robles, Hermilio Valdizan, Jose Crespo Y Castillo |
+| VEC-NARANJILLO | 2 | Hermilio Valdizan |
 
 ---
 
-## 📋 5. Ficha de Registro de Campo para Tesis (Ground Truth Form)
+## 4. Ficha de Registro de Campo (Ground Truth Form)
 
-Copia o imprime este formato para cada punto que visites:
+Imprime una ficha por foco visitado. Estos son los campos que permitirán calcular
+Precisión del Usuario, comisión y omisión en la matriz de confusión de la tesis.
 
 ```markdown
-================================================================================
+==============================================================================
 FICHA DE VERIFICACIÓN DE QUEMA EN CAMPO (GROUND TRUTHING) - TESIS
-================================================================================
-N° de Foco / ID: _______________       Fecha de Visita: _____/_____/2026
+==============================================================================
+N° de Foco / ID: _______________       Fecha de Visita: _____/_____/______
 Distrito: ______________________       Hora de Visita:  _____:_____ AM/PM
 Coordenadas GPS Satélite: Lat: _______________  Lon: _______________
-Coordenadas GPS Campo:    Lat: _______________  Lon: _______________  Altitud: _____ msnm
+Coordenadas GPS Campo:    Lat: _______________  Lon: _______________
+Altitud: _____ msnm                    Sensor / FRP reportado: _______________
 
 1. ESTADO ACTUAL DEL EVENTO:
    [ ] Fuego activo visible / llamas
    [ ] Humo / brazas residuales
    [ ] Ceniza reciente (negra/gris fresca)
    [ ] Suelo quemado lixiviado (lluvia reciente)
-   [ ] No se observa evidencia de fuego (Posible Falso Positivo / Techo de calamina caliente)
+   [ ] No se observa evidencia (posible falso positivo / techo de calamina caliente)
 
 2. TIPO DE COBERTURA VEGETAL AFECTADA:
-   [ ] Purma o bosque secundario
-   [ ] Bosque primario / ripario
-   [ ] Pastizal para ganadería
-   [ ] Rastrojo agrícola (Cacao / Café / Plátano / Maíz)
+   [ ] Purma o bosque secundario            [ ] Bosque primario / ripario
+   [ ] Pastizal para ganadería              [ ] Rastrojo (cacao / café / plátano / maíz)
    [ ] Residuos de tala / desbroce
 
 3. SEVERIDAD DE LA QUEMA:
-   [ ] Baja (Solo hojarasca superficial quemada, suelo no alterado)
-   [ ] Moderada (Capa orgánica quemada, hojas y ramas pequeñas consumidas)
-   [ ] Alta (Biomasa leñosa consumida, suelo enrojecido/mineralizado, copas chamuscadas)
+   [ ] Baja (hojarasca superficial)   [ ] Moderada (capa orgánica)
+   [ ] Alta (biomasa leñosa, suelo mineralizado)
 
 4. ESTIMACIÓN DE ÁREA Y TOPOGRAFÍA:
-   * Área aproximada quemada: ____________ m²  o  ____________ ha
-   * Pendiente del terreno: [ ] Plano (0-5%) [ ] Ondulado (5-25%) [ ] Escarpado (>25%)
+   Área aproximada quemada: ____________ m²  o  ____________ ha
+   Pendiente: [ ] Plano (0-5%)  [ ] Ondulado (5-25%)  [ ] Escarpado (>25%)
 
 5. CAUSA ANTRÓPICA APARENTE:
-   [ ] Roce y quema para habilitación de nuevo cultivo (Chacra nueva)
-   [ ] Limpieza de maleza en cultivo establecido
-   [ ] Quema de pasturas
-   [ ] Quema de basura / desechos periurbanos
+   [ ] Roce y quema para chacra nueva       [ ] Limpieza de maleza en cultivo
+   [ ] Quema de pasturas                    [ ] Quema de basura
    [ ] Incendio forestal fuera de control
 
 6. REGISTRO FOTOGRÁFICO GEORREFERENCIADO:
-   * Foto N° 1 (Panorámica Norte):  Foto_ID: _______________
-   * Foto N° 2 (Panorámica Sur):    Foto_ID: _______________
-   * Foto N° 3 (Detalle de Ceniza): Foto_ID: _______________
-   * Foto N° 4 (Límite no quemado): Foto_ID: _______________
+   Foto N° 1 (Panorámica Norte):  ID: ______________
+   Foto N° 2 (Panorámica Sur):    ID: ______________
+   Foto N° 3 (Detalle de ceniza): ID: ______________
+   Foto N° 4 (Límite no quemado): ID: ______________
 
-7. NOTAS Y TESTIMONIOS LOCALES (si se entrevistó a agricultor/morador):
-   ____________________________________________________________________________
-   ____________________________________________________________________________
-================================================================================
+7. NOTAS Y TESTIMONIOS LOCALES:
+   ____________________________________________________________________
+   ____________________________________________________________________
+==============================================================================
 ```
 
 ---
 
-## 💡 6. Recomendaciones Metodológicas para tu Tesis
+## 5. Notas metodológicas
 
-1. **Matriz de Confusión Satelital:** Compara los focos que logres verificar en campo con la detección de FIRMS para calcular la **Precisión del Usuario**, **Comisión** (falsos positivos) y **Omisión** (quemas que viste en el camino y no detectó el satélite por nubosidad o baja temperatura).
-2. **Influencia de la Nubosidad:** Anota la cobertura de nubes del día reportado. En selva alta es el factor limitante principal de los sensores ópticos/térmicos.
-3. **Cálculo de Severidad dNBR:** Usa las coordenadas de los focos de mayor FRP (ej. Luyando con 32.6 MW y Hermilio Valdizán con 28.4 MW) para descargar imágenes Sentinel-2 / Landsat-8 y calcular los índices de severidad pre y post fuego ($dNBR = NBR_{pre} - NBR_{post}$).
+1. **Ventana de validez:** en selva alta la evidencia se degrada rápido (0-48 h: ceniza fresca; 3-7 días: lluvia lixivia; >7 días: perímetro difuso).
+2. **Traslape de sensores:** MODIS tiene píxel de 1 km y VIIRS de 375 m. Varios registros cercanos pueden ser el mismo frente de quema; conviene agruparlos en campo.
+3. **Campos estimados:** `dist_carretera_km`, `tiempo_estimado` y `costo_estimado_pen` son estimaciones calculadas, no mediciones. Úsalos para planificar, no como dato duro.
+4. **Trazabilidad:** el campo `verificado_firms` del histórico indica la fecha en que el registro se contrastó contra la respuesta cruda de NASA FIRMS.
+5. **Nubosidad:** en selva alta es el factor limitante de los sensores ópticos. Anota la cobertura de nubes del día reportado al calcular omisión.
