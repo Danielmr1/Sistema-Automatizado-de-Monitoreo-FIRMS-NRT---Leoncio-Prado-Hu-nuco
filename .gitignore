@@ -14,6 +14,22 @@ venv/
 scratch/
 .system_generated/
 
+# Artefactos generados por cada corrida del pipeline (no versionar).
+# El unico CSV que SI se versiona es el historico maestro y el registro de ejecuciones.
+alertas_*.csv
+alertas_*.kml
+mapa_*.html
+
+# Respaldos locales
+*.bak_pre_*
+*.bak_*
+_gh_*.csv
+
+# Paquetes de despliegue y reportes generados
+paquete_repo*/
+reporte_verificacion*.md
+COMO_SUBIR_AL_REPOSITORIO.txt
+
 # OS files
 .DS_Store
 Thumbs.db
