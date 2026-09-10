@@ -16,11 +16,31 @@ import requests
 import pandas as pd
 
 # ---------------------------------------------------------------------------
+# 0. COMPATIBILIDAD DE CODIFICACIÓN (Windows / cp1252)
+# ---------------------------------------------------------------------------
+# En consola Windows la salida por defecto es cp1252 y cualquier print con
+# caracteres no ASCII (p. ej. el check "OK" con simbolo) lanzaba
+# UnicodeEncodeError. Al estar dentro de un try/except, la excepcion
+# descartaba el DataFrame ya descargado y el sistema reportaba "0 registros".
+# Forzamos UTF-8 en stdout/stderr para que el pipeline sea identico en
+# Ubuntu (GitHub Actions) y en Windows.
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
+# ---------------------------------------------------------------------------
 # 1. CONFIGURACIÓN Y PARÁMETROS DEL SISTEMA (SOLO NRT)
 # ---------------------------------------------------------------------------
-FIRMS_API_KEY = os.getenv("FIRMS_API_KEY", "e10ebd29b9c7a2e16d862032a9f824a2")
+# La API key NO se escribe en el código: se lee siempre de una variable de
+# entorno (GitHub Secret en Actions, $env:FIRMS_API_KEY en local).
+FIRMS_API_KEY = os.getenv("FIRMS_API_KEY", "")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
+
+# Límite real de la API FIRMS: el parámetro de días acepta 1..5
+MAX_DAY_RANGE = 5
 
 # Bounding Box ampliado oficial Leoncio Prado (minLon, minLat, maxLon, maxLat)
 BBOX = "-76.55,-9.65,-75.55,-8.30"
@@ -32,6 +52,11 @@ SOURCES = ["MODIS_NRT", "VIIRS_SNPP_NRT", "VIIRS_NOAA20_NRT"]
 # Rutas de archivos espaciales y de base de datos
 AOI_GEOJSON_PATH = "aoi_leoncio_prado.geojson"
 HISTORICAL_CSV_PATH = "historico_leoncio_prado_2026.csv"
+RUN_LOG_CSV_PATH = "registro_ejecuciones.csv"
+
+# Columnas añadidas al histórico para trazabilidad del dato (no alteran las
+# columnas originales de FIRMS, se anexan al final).
+EXTRA_HIST_COLS = ["distrito", "confianza_cruda", "verificado_firms", "tipo_registro"]
 
 
 # ---------------------------------------------------------------------------
@@ -58,7 +83,7 @@ def fetch_firms_data(source: str, api_key: str, bbox: str, day_range: str, start
         df = pd.read_csv(io.StringIO(content))
         if not df.empty:
             df["source_sensor"] = source
-            print(f"[FIRMS API] ✓ {len(df)} registros crudos descargados de {source}.")
+            print(f"[FIRMS API] OK: {len(df)} registros crudos descargados de {source}.")
         else:
             print(f"[FIRMS API] 0 registros para {source}.")
         return df
@@ -155,20 +180,24 @@ def apply_spatial_filter(df: pd.DataFrame, geojson_path: str) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # 4. FILTRADO ESTADÍSTICO POR CONFIANZA DE SENSOR
 # ---------------------------------------------------------------------------
-def apply_confidence_filter(df: pd.DataFrame) -> pd.DataFrame:
+def apply_confidence_filter(df: pd.DataFrame):
     """
-    Aplica umbrales estadísticos de calidad según el tipo de sensor:
-    - MODIS: confidence >= 60
-    - VIIRS: confidence in ['n', 'h', 'nominal', 'high']
+    Separa las detecciones según los umbrales estadísticos de calidad del proyecto:
+      - MODIS: confidence >= 60
+      - VIIRS: confidence in ['n', 'h', 'nominal', 'high']
+
+    Devuelve una tupla (valid_df, low_conf_df). Las detecciones que NO superan el
+    umbral ya no se descartan en silencio: se devuelven aparte porque son las que
+    permiten analizar OMISION y falsos positivos en la validación de campo.
     """
     if df.empty:
-        return df
+        return df, df
 
     valid_mask = []
     for _, row in df.iterrows():
         source = str(row.get("source_sensor", "")).upper()
         confidence = str(row.get("confidence", "")).strip().lower()
-        
+
         if "MODIS" in source:
             try:
                 conf_val = float(confidence)
@@ -179,10 +208,33 @@ def apply_confidence_filter(df: pd.DataFrame) -> pd.DataFrame:
             valid_mask.append(confidence in ["n", "h", "nominal", "high"])
         else:
             valid_mask.append(True)
-            
-    filtered_df = df[valid_mask].copy()
-    print(f"[Filtro Estadístico] {len(filtered_df)} anomalías superaron los umbrales de confianza requeridos.")
-    return filtered_df
+
+    valid_df = df[valid_mask].copy()
+    low_conf_df = df[[not v for v in valid_mask]].copy()
+    print(f"[Filtro Estadístico] {len(valid_df)} anomalías superaron los umbrales de confianza "
+          f"({len(low_conf_df)} de baja confianza conservadas aparte para análisis de omisión).")
+    return valid_df, low_conf_df
+
+
+def normalize_confidence_label(source: str, confidence: str) -> str:
+    """Etiqueta textual de confianza para el histórico: alta / nominal / baja."""
+    source = str(source).upper()
+    conf = str(confidence).strip().lower()
+    if "MODIS" in source:
+        try:
+            v = float(conf)
+        except (ValueError, TypeError):
+            return "baja"
+        if v >= 80:
+            return "alta"
+        if v >= 60:
+            return "nominal"
+        return "baja"
+    if conf in ("h", "high"):
+        return "alta"
+    if conf in ("n", "nominal"):
+        return "nominal"
+    return "baja"
 
 
 # ---------------------------------------------------------------------------
@@ -220,8 +272,45 @@ def _point_to_segment_distance_km(plat, plon, lat1, lon1, lat2, lon2):
     return math.sqrt((px - proj_x)**2 + (py - proj_y)**2)
 
 
-def calculate_road_accessibility_and_costs(df: pd.DataFrame) -> pd.DataFrame:
-    """Calcula la distancia a la carretera más cercana, tiempo de marcha y costo en Soles."""
+def _coords_to_road_segments(roads_geojson):
+    """
+    Convierte la red vial oficial (GeoJSON de LineStrings) al formato interno
+    [{'code','name','base_cost','coords':[(lat,lon),...]}].
+    """
+    if not roads_geojson:
+        return []
+    costos = {"PE-5N": 5, "PE-18A": 15, "HU-104": 25}
+    segmentos = []
+    for feat in roads_geojson.get("features", []):
+        props = feat.get("properties", {}) or {}
+        geom = feat.get("geometry", {}) or {}
+        codigo = str(props.get("codigo") or props.get("CODIGO") or "Vía").strip()
+        nombre = str(props.get("nombre") or props.get("NOMBRE") or codigo).strip()
+        base_cost = next((v for k, v in costos.items() if k in codigo.upper()), 20)
+
+        gtype = geom.get("type", "")
+        lineas = []
+        if gtype == "LineString":
+            lineas = [geom.get("coordinates", [])]
+        elif gtype == "MultiLineString":
+            lineas = geom.get("coordinates", [])
+
+        for linea in lineas:
+            # GeoJSON es [lon, lat]; el cálculo interno usa (lat, lon)
+            pts = [(float(c[1]), float(c[0])) for c in linea if len(c) >= 2]
+            if len(pts) >= 2:
+                segmentos.append({"code": codigo, "name": nombre, "base_cost": base_cost, "coords": pts})
+    return segmentos
+
+
+def calculate_road_accessibility_and_costs(df: pd.DataFrame, roads_geojson=None):
+    """
+    Calcula la distancia a la carretera más cercana, tiempo de marcha y costo en Soles.
+
+    Si se dispone del GeoJSON vial oficial (aoi_carreteras_leoncio_prado.geojson)
+    se usa esa geometría, que es la del MTC. Si no, recurre a los ejes viales
+    de respaldo definidos en el código (trazado simplificado a mano).
+    """
     if df.empty:
         return df
 
@@ -246,6 +335,21 @@ def calculate_road_accessibility_and_costs(df: pd.DataFrame) -> pd.DataFrame:
         ]}
     ]
 
+    # Preferir la geometría vial oficial cuando está disponible
+    segmentos_oficiales = _coords_to_road_segments(roads_geojson)
+    if segmentos_oficiales:
+        road_segments = segmentos_oficiales
+        distancias_metodo = "geometría oficial del MTC"
+    else:
+        distancias_metodo = "trazado de respaldo (simplificado)"
+
+    # Aplanar segmentos una sola vez (rendimiento) conservando la referencia
+    segmentos_planos = []
+    for road in road_segments:
+        pts = road["coords"]
+        for i in range(len(pts) - 1):
+            segmentos_planos.append((road, pts[i], pts[i + 1]))
+
     min_distances = []
     nearest_names = []
     access_levels = []
@@ -258,19 +362,17 @@ def calculate_road_accessibility_and_costs(df: pd.DataFrame) -> pd.DataFrame:
         lon = float(row["longitude"])
 
         best_dist = 999.0
-        best_road = "PE-5N"
+        best_road = road_segments[0] if road_segments else {"code": "N/D", "name": ""}
 
-        for road in road_segments:
-            pts = road["coords"]
-            for i in range(len(pts) - 1):
-                d = _point_to_segment_distance_km(lat, lon, pts[i][0], pts[i][1], pts[i+1][0], pts[i+1][1])
-                if d < best_dist:
-                    best_dist = d
-                    best_road = f"{road['code']} ({road['name']})"
+        for road, p1, p2 in segmentos_planos:
+            d = _point_to_segment_distance_km(lat, lon, p1[0], p1[1], p2[0], p2[1])
+            if d < best_dist:
+                best_dist = d
+                best_road = road
 
         dist_km = round(best_dist, 2)
         min_distances.append(dist_km)
-        nearest_names.append(best_road)
+        nearest_names.append(f"{best_road['code']} ({best_road['name']})")
 
         if dist_km <= 1.0:
             access_levels.append("ALTA")
@@ -294,8 +396,163 @@ def calculate_road_accessibility_and_costs(df: pd.DataFrame) -> pd.DataFrame:
     df["costo_estimado_pen"] = travel_costs
     df["google_maps_url"] = gmaps_links
 
-    print(f"[Accesibilidad Vial] Distancias calculadas a la red de carreteras (Distancia mín: {min(min_distances)} km, máx: {max(min_distances)} km).")
+    print(f"[Accesibilidad Vial] Método: {distancias_metodo} | "
+          f"Distancia mín: {min(min_distances)} km, máx: {max(min_distances)} km.")
     return df
+
+
+# ---------------------------------------------------------------------------
+# 5b. ASIGNACIÓN DE DISTRITO Y SELLO DE VERIFICACIÓN
+# ---------------------------------------------------------------------------
+def load_roads_geojson(geojson_path: str):
+    """
+    Carga la red vial oficial (aoi_carreteras_leoncio_prado.geojson) para el mapa.
+    Devuelve None si el archivo no existe o no es válido.
+    """
+    if not os.path.exists(geojson_path):
+        print(f"[Red Vial] No se encontró {geojson_path}; el mapa se generará sin capa de carreteras.")
+        return None
+    try:
+        with open(geojson_path, "r", encoding="utf-8") as f:
+            roads = json.load(f)
+        n = len(roads.get("features", []))
+        print(f"[Red Vial] {n} tramos de carretera cargados desde {geojson_path}.")
+        return roads
+    except Exception as e:
+        print(f"[Red Vial Warning] No se pudo leer {geojson_path}: {e}")
+        return None
+
+
+def _load_district_polygons():
+    """
+    Devuelve {nombre_distrito: [anillos]} si existe un GeoJSON de distritos.
+    El archivo aoi_leoncio_prado.geojson es solo el límite provincial, así que
+    se admiten archivos opcionales de distritos con estas rutas.
+    """
+    candidatos = [
+        "distritos_leoncio_prado.geojson",
+        "aoi_distritos_leoncio_prado.geojson",
+    ]
+    # Nombres de propiedad del campo de distrito, en orden de preferencia
+    campos_nombre = ("nombre", "NOMBDIST", "DISTRITO", "distrito", "NOMBRE", "name")
+    for path in candidatos:
+        if not os.path.exists(path):
+            continue
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            distritos = {}
+            for feat in data.get("features", []):
+                props = feat.get("properties", {}) or {}
+                nombre = ""
+                for campo in campos_nombre:
+                    valor = props.get(campo)
+                    if valor and str(valor).strip():
+                        nombre = str(valor).strip()
+                        break
+                if not nombre:
+                    nombre = "Sin nombre"
+                geom = feat.get("geometry", {}) or {}
+                gtype = geom.get("type", "")
+                coords = geom.get("coordinates", [])
+                rings = []
+                if gtype == "Polygon":
+                    rings.append(coords[0])
+                elif gtype == "MultiPolygon":
+                    for poly in coords:
+                        rings.append(poly[0])
+                if rings:
+                    distritos[str(nombre).strip().title()] = rings
+            if distritos:
+                print(f"[Distritos] {len(distritos)} distritos cargados desde {path}.")
+                return distritos
+        except Exception as e:
+            print(f"[Distritos Warning] No se pudo leer {path}: {e}")
+    return None
+
+
+def assign_district(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Asigna el nombre de distrito a cada foco. Si no hay GeoJSON de distritos,
+    deja el nombre de la provincia (comportamiento anterior, que dejaba el
+    campo vacío) para que la columna nunca quede en blanco.
+    """
+    if df.empty:
+        return df
+
+    distritos = _load_district_polygons()
+    if not distritos:
+        df["distrito"] = "Leoncio Prado (distrito no determinado)"
+        print("[Distritos] Sin GeoJSON de distritos: se usa la etiqueta provincial. "
+              "Añade distritos_leoncio_prado.geojson para el desglose por distrito.")
+        return df
+
+    asignados = []
+    for _, row in df.iterrows():
+        lon = float(row["longitude"])
+        lat = float(row["latitude"])
+        nombre = ""
+        for dist, rings in distritos.items():
+            if any(_point_in_polygon(lon, lat, ring) for ring in rings):
+                nombre = dist
+                break
+        asignados.append(nombre if nombre else "Fuera de distrito / límite")
+    df["distrito"] = asignados
+    print(f"[Distritos] Distrito asignado a {sum(1 for d in asignados if d)} focos.")
+    return df
+
+
+def stamp_firms_verification(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Sella cada registro con la fecha en que el dato quedó respaldado contra la
+    respuesta cruda de NASA FIRMS (trazabilidad para la tesis: el dato es real,
+    no simulado). Como el pipeline consume la API directamente, la respuesta
+    recibida ES la referencia FIRMS.
+
+    Respeta el campo 'tipo_registro' si ya viene asignado (p. ej. las
+    detecciones de baja confianza se marcan aparte y no deben pasar a
+    'validado').
+    """
+    if df.empty:
+        return df
+    df["verificado_firms"] = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+    if "tipo_registro" not in df.columns:
+        df["tipo_registro"] = "validado"
+    else:
+        df["tipo_registro"] = df["tipo_registro"].fillna("").replace("", "validado")
+    df["confianza_cruda"] = [
+        normalize_confidence_label(r.get("source_sensor", ""), r.get("confidence", ""))
+        for _, r in df.iterrows()
+    ]
+    return df
+
+
+# ---------------------------------------------------------------------------
+# 5c. REGISTRO DIARIO DE EJECUCIONES
+# ---------------------------------------------------------------------------
+def append_run_log(stats: dict, log_path: str = RUN_LOG_CSV_PATH):
+    """
+    Escribe una línea por ejecución, incluso cuando hay 0 focos. Permite
+    distinguir "ese día no hubo quemas" de "ese día falló la fuente", y
+    conserva la serie temporal completa para análisis de estacionalidad.
+    """
+    columnas = [
+        "fecha_utc", "hora_utc", "dias_consultados", "fecha_inicio",
+        "sensores_consultados", "registros_crudos_bbox",
+        "dentro_aoi", "validados", "baja_confianza", "errores_fuente",
+        "estado", "detalle",
+    ]
+    fila = {c: stats.get(c, "") for c in columnas}
+    df = pd.DataFrame([fila], columns=columnas)
+
+    if os.path.exists(log_path):
+        try:
+            previo = pd.read_csv(log_path)
+            df = pd.concat([previo, df], ignore_index=True)
+        except Exception as e:
+            print(f"[Registro Ejecuciones Warning] No se pudo leer {log_path} ({e}). Se recrea.")
+    df.to_csv(log_path, index=False, encoding="utf-8-sig")
+    print(f"[Registro Ejecuciones] Guardado en {log_path} (estado: {fila['estado']}).")
 
 
 # ---------------------------------------------------------------------------
@@ -344,13 +601,14 @@ def check_recent_rainfall(df: pd.DataFrame) -> pd.DataFrame:
 # ---------------------------------------------------------------------------
 # 7. GENERACIÓN DE MAPA INTERACTIVO HTML (Leaflet Nativo de Alta Resolución)
 # ---------------------------------------------------------------------------
-def generate_interactive_map(df: pd.DataFrame, aoi_path: str, output_html_path: str):
-    """Genera un mapa HTML interactivo moderno con imagen satelital, límites y focos."""
+def generate_interactive_map(df: pd.DataFrame, aoi_path: str, output_html_path: str, roads_geojson=None):
+    """Genera un mapa HTML interactivo moderno con imagen satelital, límites, red vial y focos."""
     geojson_str = "{}"
     if os.path.exists(aoi_path):
         with open(aoi_path, "r", encoding="utf-8") as f:
             geojson_str = f.read()
 
+    roads_str = json.dumps(roads_geojson) if roads_geojson else "null"
     fires_json = df.to_json(orient="records")
 
     html_template = f"""<!DOCTYPE html>
@@ -396,6 +654,28 @@ def generate_interactive_map(df: pd.DataFrame, aoi_path: str, output_html_path: 
         style: {{ color: '#22c55e', weight: 3.5, opacity: 0.9, fillColor: '#22c55e', fillOpacity: 0.08, dashArray: '5, 5' }}
       }}).addTo(map);
       map.fitBounds(aoiLayer.getBounds(), {{ padding: [20, 20] }});
+    }}
+
+    // Red vial oficial (aoi_carreteras_leoncio_prado.geojson)
+    const roadsData = {roads_str};
+    if (roadsData && roadsData.features) {{
+      L.geoJSON(roadsData, {{
+        style: function (feat) {{
+          const cod = ((feat.properties || {{}}).codigo || '').toUpperCase();
+          const color = cod.indexOf('PE-5N') >= 0 ? '#06b6d4'
+                      : cod.indexOf('PE-18A') >= 0 ? '#a855f7'
+                      : '#facc15';
+          return {{ color: color, weight: 3, opacity: 0.85 }};
+        }},
+        onEachFeature: function (feat, layer) {{
+          const p = feat.properties || {{}};
+          layer.bindPopup(
+            '<div style="font-size:12px;line-height:1.4;">' +
+            '<b>' + (p.codigo || 'Vía') + '</b><br>' + (p.nombre || '') +
+            '<br><i>' + (p.categoria || '') + '</i></div>'
+          );
+        }}
+      }}).addTo(map);
     }}
 
     const fires = {fires_json};
@@ -502,8 +782,17 @@ def generate_kml(df: pd.DataFrame, output_kml_path: str):
 # 9. GESTIÓN DEL REGISTRO HISTÓRICO PERSISTENTE
 # ---------------------------------------------------------------------------
 def update_historical_database(daily_df: pd.DataFrame, historical_path: str):
-    """Concatena detecciones al histórico maestro y elimina registros duplicados."""
+    """
+    Concatena detecciones al histórico maestro y elimina registros duplicados.
+
+    El histórico es la evidencia central de la tesis: se conservan TODAS las
+    columnas originales de FIRMS y se anexan las de trazabilidad
+    (distrito, confianza_cruda, verificado_firms, tipo_registro).
+    La deduplicación usa lat/lon/fecha/hora/sensor, que es la clave única de
+    una detección FIRMS (dos sensores pueden ver el mismo pixel).
+    """
     if daily_df.empty:
+        print("[Histórico] Sin detecciones nuevas; el histórico no se modifica.")
         return
 
     clean_daily = daily_df.copy()
@@ -518,16 +807,25 @@ def update_historical_database(daily_df: pd.DataFrame, historical_path: str):
     else:
         combined_df = clean_daily.copy()
 
-    dedup_cols = ["latitude", "longitude", "acq_date", "acq_time"]
+    # Rellenar columnas de trazabilidad si el histórico previo no las tenía
+    for col in EXTRA_HIST_COLS:
+        if col not in combined_df.columns:
+            combined_df[col] = ""
+        combined_df[col] = combined_df[col].fillna("")
+
+    dedup_cols = ["latitude", "longitude", "acq_date", "acq_time", "source_sensor"]
     existing_dedup_cols = [c for c in dedup_cols if c in combined_df.columns]
 
     initial_len = len(combined_df)
     if existing_dedup_cols:
-        combined_df.drop_duplicates(subset=existing_dedup_cols, keep="first", inplace=True)
-    
+        combined_df.drop_duplicates(subset=existing_dedup_cols, keep="last", inplace=True)
+
     final_len = len(combined_df)
-    combined_df.to_csv(historical_path, index=False)
-    print(f"[Histórico Actualizado] {final_len} registros totales guardados ({initial_len - final_len} duplicados removidos).")
+
+    # utf-8-sig para que Excel en Windows abra el CSV con tildes correctas
+    combined_df.to_csv(historical_path, index=False, encoding="utf-8-sig")
+    print(f"[Histórico Actualizado] {final_len} registros totales guardados "
+          f"({initial_len - final_len} duplicados removidos).")
 
 
 # ---------------------------------------------------------------------------
@@ -630,44 +928,101 @@ def send_telegram_alert(df: pd.DataFrame, csv_path: str, html_path: str, kml_pat
 def main():
     import argparse
     parser = argparse.ArgumentParser(description="Monitoreo Automatizado FIRMS NRT - Leoncio Prado")
-    parser.add_argument("--days", type=str, default=DAY_RANGE, help="Rango de días NRT a consultar (1 a 10). Por defecto: 2")
+    parser.add_argument("--days", type=str, default=DAY_RANGE,
+                        help="Rango de días NRT a consultar (la API FIRMS acepta 1 a 5). Por defecto: 2")
     parser.add_argument("--date", type=str, default=None, help="Fecha específica de inicio (formato YYYY-MM-DD). Opcional.")
+    parser.add_argument("--incluir-baja-confianza", action="store_true",
+                        help="Guarda también las detecciones que no superan el umbral de confianza, "
+                             "marcadas como 'baja_confianza' (útil para analizar omisión).")
     args = parser.parse_args()
+
+    ahora_utc = datetime.datetime.now(datetime.timezone.utc)
+    today_str = ahora_utc.strftime("%Y%m%d")
 
     print("=" * 70)
     print("INICIANDO SISTEMA DE MONITOREO DE QUEMAS NRT - LEONCIO PRADO")
-    today_str = datetime.datetime.utcnow().strftime("%Y%m%d")
     print(f"Fecha de ejecución UTC: {today_str}")
     print(f"Ventana NRT: {args.days} días{f' desde {args.date}' if args.date else ' (últimos días)'}")
     print(f"Sensores NRT activos: {', '.join(SOURCES)}")
     print("=" * 70)
 
+    # Estadísticas de la ejecución: alimentan registro_ejecuciones.csv
+    stats = {
+        "fecha_utc": ahora_utc.strftime("%Y-%m-%d"),
+        "hora_utc": ahora_utc.strftime("%H:%M:%S"),
+        "dias_consultados": args.days,
+        "fecha_inicio": args.date or "",
+        "sensores_consultados": "|".join(SOURCES),
+        "registros_crudos_bbox": 0,
+        "dentro_aoi": 0,
+        "validados": 0,
+        "baja_confianza": 0,
+        "errores_fuente": 0,
+        "estado": "iniciado",
+        "detalle": "",
+    }
+
+    def _cerrar(stats, log_path=RUN_LOG_CSV_PATH):
+        """Escribe el registro de ejecución antes de salir (incluso con 0 focos)."""
+        append_run_log(stats, log_path)
+
     if not FIRMS_API_KEY:
+        stats["estado"] = "error"
+        stats["detalle"] = "FIRMS_API_KEY no configurada"
+        _cerrar(stats)
         print("[CRITICAL ERROR] Variable de entorno 'FIRMS_API_KEY' no configurada.", file=sys.stderr)
         sys.exit(1)
 
     raw_df = download_all_sources(day_range=args.days, start_date=args.date)
+    stats["registros_crudos_bbox"] = len(raw_df)
+
     if raw_df.empty:
+        stats["estado"] = "sin_datos_fuente"
+        stats["detalle"] = "La API FIRMS no devolvió registros (revisar conectividad, MAP_KEY o rango de días)"
+        _cerrar(stats)
         print("[Fin] No se obtuvieron registros de la API FIRMS en el área consultada.")
         sys.exit(0)
 
     # 1. Filtro espacial Point-in-Polygon contra el polígono oficial
     spatial_df = apply_spatial_filter(raw_df, AOI_GEOJSON_PATH)
+    stats["dentro_aoi"] = len(spatial_df)
     if spatial_df.empty:
+        stats["estado"] = "sin_focos_en_aoi"
+        stats["detalle"] = f"{len(raw_df)} detecciones en el BBOX, 0 dentro de Leoncio Prado"
+        _cerrar(stats)
         print("[Fin] No se detectaron anomalías térmicas dentro de los límites de Leoncio Prado.")
         sys.exit(0)
 
     # 2. Filtro estadístico de calidad (MODIS >= 60, VIIRS nominal/alta)
-    final_df = apply_confidence_filter(spatial_df)
-    if final_df.empty:
+    valid_df, low_conf_df = apply_confidence_filter(spatial_df)
+    stats["validados"] = len(valid_df)
+    stats["baja_confianza"] = len(low_conf_df)
+
+    guardar_df = valid_df.copy()
+    if args.incluir_baja_confianza and not low_conf_df.empty:
+        low_conf_df = low_conf_df.copy()
+        low_conf_df["tipo_registro"] = "baja_confianza"
+        guardar_df = pd.concat([guardar_df, low_conf_df], ignore_index=True)
+        print(f"[Filtro Estadístico] Se incluirán {len(low_conf_df)} detecciones de baja confianza en el histórico.")
+
+    if guardar_df.empty:
+        stats["estado"] = "sin_focos_validados"
+        stats["detalle"] = "Ninguna detección superó los umbrales de confianza del proyecto"
+        _cerrar(stats)
         print("[Fin] Ninguna anomalía superó los umbrales de confianza del proyecto.")
         sys.exit(0)
 
     # 3. Cálculo de accesibilidad vial métrica y estimación de costos
-    final_df = calculate_road_accessibility_and_costs(final_df)
+    #    Se usa la geometría vial oficial si está disponible
+    roads_geojson = load_roads_geojson("aoi_carreteras_leoncio_prado.geojson")
+    final_df = calculate_road_accessibility_and_costs(guardar_df, roads_geojson)
 
     # 4. Verificación de lluvia reciente (Open-Meteo API)
     final_df = check_recent_rainfall(final_df)
+
+    # 5. Distrito, sello de verificación FIRMS y etiqueta de confianza
+    final_df = assign_district(final_df)
+    final_df = stamp_firms_verification(final_df)
 
     print(f"\n>>> ¡ALERTA ACTIVADA! {len(final_df)} focos de calor válidos identificados. <<<\n")
 
@@ -676,13 +1031,17 @@ def main():
     daily_kml_path = f"alertas_{today_str}.kml"
 
     export_df = final_df.copy()
-    export_df.to_csv(daily_csv_path, index=False)
+    export_df.to_csv(daily_csv_path, index=False, encoding="utf-8-sig")
     print(f"[Archivos Diarios] CSV generado: {daily_csv_path}")
 
-    generate_interactive_map(final_df, AOI_GEOJSON_PATH, daily_html_path)
+    generate_interactive_map(final_df, AOI_GEOJSON_PATH, daily_html_path, roads_geojson)
     generate_kml(final_df, daily_kml_path)
     update_historical_database(export_df, HISTORICAL_CSV_PATH)
     send_telegram_alert(final_df, daily_csv_path, daily_html_path, daily_kml_path, today_str)
+
+    stats["estado"] = "ok"
+    stats["detalle"] = f"{len(final_df)} focos guardados en histórico"
+    _cerrar(stats)
 
     print("=" * 70)
     print("PROCESO COMPLETADO EXITOSAMENTE.")
