@@ -74,7 +74,10 @@ Nunca pongas tus claves directamente en el código público de GitHub. Se config
 
 Si quieres ejecutar el script en tu computadora antes de subirlo a GitHub:
 
-1. Abre tu terminal de **PowerShell** en la carpeta del proyecto.
+1. Abre tu terminal de **PowerShell** en la carpeta del proyecto:
+   ```powershell
+   cd "D:\Monitoreo de quemas"
+   ```
 2. Define temporalmente tus variables de entorno ejecutando:
    ```powershell
    $env:FIRMS_API_KEY="TU_MAP_KEY_DE_FIRMS"
@@ -83,23 +86,28 @@ Si quieres ejecutar el script en tu computadora antes de subirlo a GitHub:
    ```
 3. Ejecuta el ciclo completo (recomendado):
    ```powershell
-   python sincronizar_datos.py
+   py sincronizar_datos.py
    ```
    O bien el pipeline solo:
    ```powershell
-   python main.py --incluir-baja-confianza
+   py main.py --incluir-baja-confianza
    ```
 4. El sistema descargará las anomalías reales de las últimas 48 h, calculará las distancias a
    la red vial oficial, verificará la lluvia y te enviará la alerta a Telegram con el mapa HTML,
    CSV y KML. Además registrará la ejecución en `registro_ejecuciones.csv`, incluso si ese día
    no hubo detecciones.
 
+> ⚠️ **Usa `py`, no `python`.** En este equipo el comando `python` apunta al intérprete de
+> **Inkscape**, que no tiene pandas instalado, y el sistema fallaría con
+> `ModuleNotFoundError: No module named 'pandas'`. El lanzador `py` sí apunta al Python 3.11
+> correcto. Ver la sección "Ejecución local" más abajo.
+
 ### Comprobar que los datos son reales
 
 Si alguna vez necesitas demostrar que el histórico no contiene datos simulados:
 
 ```powershell
-python verificar_historico.py --informe reporte_verificacion.md
+py verificar_historico.py --informe reporte_verificacion.md
 ```
 
 Descarga la respuesta cruda de NASA FIRMS y contrasta registro por registro las coordenadas,
