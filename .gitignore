@@ -30,6 +30,10 @@ paquete_repo*/
 reporte_verificacion*.md
 COMO_SUBIR_AL_REPOSITORIO.txt
 
+# Planes de campo con fecha: se regeneran cada vez que los necesites.
+# El catalogo EVENTOS_QUEMAS_CAMPO_TESIS.md SI se versiona.
+plan_campo_*.md
+
 # OS files
 .DS_Store
 Thumbs.db
