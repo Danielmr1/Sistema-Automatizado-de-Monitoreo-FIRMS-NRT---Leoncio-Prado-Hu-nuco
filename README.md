@@ -84,9 +84,9 @@ pip install -r requirements.txt
 La API key se lee **siempre** de una variable de entorno (nunca del código):
 
 ```powershell
-# PowerShell (Windows)
+# PowerShell (Windows) — usar "py", no "python" (ver nota abajo)
 $env:FIRMS_API_KEY="tu_map_key"
-python main.py
+py main.py
 ```
 
 ```bash
@@ -95,29 +95,38 @@ export FIRMS_API_KEY="tu_map_key"
 python main.py
 ```
 
+> ⚠️ **En este equipo Windows usa `py`, no `python`.** El comando `python` apunta al
+> intérprete de Inkscape, que no tiene pandas. El lanzador `py` sí usa el Python 3.11
+> correcto. Detalle en `GUIA_EJECUCION_LOCAL.md`.
+
 Obtén tu MAP_KEY gratuita en <https://firms.modaps.eosdis.nasa.gov/api/map_key/>.
 
 ### Ciclo completo
 
-```bash
-python sincronizar_datos.py
+```powershell
+py sincronizar_datos.py
 ```
 
-Ejecuta los 5 pasos y muestra un resumen. Opciones útiles:
+Ejecuta los 7 pasos (descarga, fusión, verificación, integridad, distritos, matriz y dashboard)
+y muestra un resumen. Opciones útiles:
 
-```bash
-python sincronizar_datos.py --dias 3          # ventana NRT de 3 días
-python sincronizar_datos.py --sin-verificar   # omite el contraste contra FIRMS
+```powershell
+py sincronizar_datos.py --dias 3          # ventana NRT de 3 días
+py sincronizar_datos.py --sin-verificar   # omite el contraste contra FIRMS
+py sincronizar_datos.py --sin-dashboard   # no regenera el dashboard
 ```
 
 ### Comandos individuales
 
-```bash
-python main.py --incluir-baja-confianza   # guarda también las detecciones débiles (marcadas)
-python verificar_historico.py --informe reporte.md --sellar
-python generar_matriz_campo.py --dias 3 --solo-accesibles
-python generar_dashboard.py
+```powershell
+py main.py --incluir-baja-confianza   # guarda también las detecciones débiles (marcadas)
+py verificar_historico.py --informe reporte.md --sellar
+py generar_matriz_campo.py --dias 3 --solo-accesibles
+py generar_dashboard.py
 ```
+
+> Para el detalle de cada comando, los errores frecuentes y el flujo antes de una salida a
+> campo, ver **`GUIA_EJECUCION_LOCAL.md`**.
 
 ---
 
