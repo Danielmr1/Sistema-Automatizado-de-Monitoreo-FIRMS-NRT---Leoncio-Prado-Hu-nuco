@@ -42,6 +42,23 @@ jobs:
           # conteo de focos validados y permiten analizar omision en la tesis.
           python main.py --incluir-baja-confianza
 
+      - name: "4b. Verificar integridad del histórico (días perdidos)"
+        # La API de FIRMS solo conserva 5 días: una detección que no se guarde
+        # hoy es irrecuperable en una semana. Este paso compara el histórico
+        # con la ventana recuperable y avisa si falta algo.
+        # No falla la ejecución (|| true): informa, no bloquea.
+        env:
+          FIRMS_API_KEY: ${{ secrets.FIRMS_API_KEY }}
+        run: |
+          set +e
+          python verificar_integridad.py --simular
+          CODIGO=$?
+          if [ "$CODIGO" = "2" ]; then
+            echo "::warning title=Huecos en el histórico::Se detectaron detecciones de FIRMS que no están en el histórico. Revisa el log y ejecuta 'python recuperar_dias.py' en local."
+          fi
+          echo "Codigo de salida de la verificación: $CODIGO"
+          exit 0
+
       - name: "5. Guardar y commitear histórico y registro de ejecuciones"
         run: |
           git config --global user.name "github-actions[bot]"
