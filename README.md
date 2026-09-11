@@ -61,13 +61,24 @@ respaldado contra la respuesta de NASA.
 
 El dashboard **no ejecuta nada**: solo muestra lo que el workflow ya recogió.
 
-* **Al abrirlo**: usa los datos incrustados por `generar_dashboard.py` (últimos 12 meses).
-* **Botón "Actualizar datos"**: descarga el histórico más reciente desde GitHub. Es manual
-  a propósito, para no consumir datos móviles sin que el usuario lo pida.
-* **Botón "Cargar histórico"**: abre un CSV de tu equipo, útil sin conexión.
+**Tres fuentes de datos, en orden de prioridad al abrir:**
+
+1. **Copia guardada en el navegador** (si existe): los últimos 60 días que descargaste antes.
+2. **Datos incrustados** por `generar_dashboard.py` (ventana de 12 meses).
+3. **Vacío**, si no hubiera ninguna de las dos.
+
+* **Botón "Actualizar datos"**: descarga el histórico más reciente desde GitHub y **guarda una
+  copia de los últimos 60 días en el navegador** (~330 KB). Es manual a propósito, para no
+  consumir datos móviles sin que el usuario lo pida.
+* **Botón "Cargar histórico"**: abre un CSV de tu equipo. También guarda la copia.
+* **Botón "Borrar datos guardados"**: elimina la copia del navegador y vuelve a los incrustados.
 * **Botón "Descargar plan de campo"**: genera el plan de salida a campo respetando los filtros
   activos (incluida la accesibilidad). Alternativa al script `generar_matriz_campo.py`.
-* **Sin internet**: sigue funcionando con los datos incrustados.
+* **Sin internet**: sigue funcionando con la copia guardada o con los datos incrustados.
+
+> **La copia es por dispositivo.** Lo que descargues en la PC no aparece en el celular: cada
+> navegador guarda la suya. Y la copia sirve para **ver** sin conexión, no para campo: para eso
+> sigue conviniendo regenerar y subir el `index.html` (ver `GUIA_EJECUCION_LOCAL.md`).
 
 Si el dashboard no incluye todos los eventos del histórico, muestra un aviso indicando
 cuántos quedaron fuera y cómo verlos.

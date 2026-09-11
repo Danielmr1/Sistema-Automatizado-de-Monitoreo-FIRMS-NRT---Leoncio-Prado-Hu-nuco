@@ -321,6 +321,20 @@
           </div>
         </div>
 
+        <!-- Copia guardada en el navegador -->
+        <div id="panel-cache" class="hidden bg-slate-900/70 border border-slate-800 rounded-xl p-3">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-start space-x-2">
+              <i data-lucide="hard-drive" class="w-4 h-4 text-cyan-400 mt-0.5 flex-shrink-0"></i>
+              <div class="text-[11px] text-slate-300 leading-relaxed" id="cache-texto"></div>
+            </div>
+            <button onclick="borrarCache()"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-red-900/60 text-slate-300 hover:text-red-200 border border-slate-700 transition">
+              Borrar datos guardados
+            </button>
+          </div>
+        </div>
+
         <!-- Zona de estudio y carga manual de archivo -->
         <div class="pt-4 border-t border-slate-800/80 grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -1007,31 +1021,162 @@
     const COBERTURA = /*COBERTURA*/{"total_historico": 312, "incluidos": 312, "fuera": 0, "dias_minimos": 365, "max_eventos": 6000, "generado": "2026-09-11", "fecha_min": "2026-08-23", "fecha_max": "2026-09-10"}/*COBERTURA*/;
 
     // Origen del histórico que está cargado ahora mismo
-    let fuenteDatos = 'incrustado';   // 'incrustado' | 'github' | 'archivo'
+    let fuenteDatos = 'incrustado';   // 'incrustado' | 'github' | 'archivo' | 'cache'
     let fechaCargaDatos = null;
+
+    // =====================================================================
+    // COPIA EN EL NAVEGADOR
+    // Los eventos que trae "Actualizar datos" viven en memoria y se pierden
+    // al recargar. Para que se conserven, se guarda una copia de los últimos
+    // 60 días en localStorage (unos 330 KB) y se carga sola al abrir.
+    // =====================================================================
+    const DIAS_CACHE = 60;
+    const CLAVE_CACHE = 'firms_historico_60d';
+    const CLAVE_CACHE_META = 'firms_historico_60d_meta';
+
+    // Devuelve solo los registros de los últimos N días respecto a la fecha
+    // más reciente del propio conjunto.
+    function recortarUltimosDias(registros, dias) {
+      if (!registros.length) return [];
+      const fechas = registros.map(r => r.acq_date).sort();
+      const ref = fechas[fechas.length - 1];
+      const limite = new Date(ref + 'T00:00:00Z');
+      limite.setUTCDate(limite.getUTCDate() - (dias - 1));
+      const lim = limite.toISOString().slice(0, 10);
+      return registros.filter(r => r.acq_date >= lim && r.acq_date <= ref);
+    }
+
+    // Cuánto ocupan los datos incrustados y cuánto la copia guardada
+    function tamanoAproxKB(texto) {
+      return Math.round(new Blob([texto]).size / 1024);
+    }
+
+    function guardarEnCache(registros) {
+      if (!registros || !registros.length) return false;
+      try {
+        const recorte = recortarUltimosDias(registros, DIAS_CACHE);
+        const json = JSON.stringify(recorte);
+        const fechas = recorte.map(r => r.acq_date).sort();
+
+        localStorage.setItem(CLAVE_CACHE, json);
+        localStorage.setItem(CLAVE_CACHE_META, JSON.stringify({
+          guardado: new Date().toISOString(),
+          eventos: recorte.length,
+          desde: fechas[0],
+          hasta: fechas[fechas.length - 1],
+          dias: DIAS_CACHE,
+          kb: tamanoAproxKB(json)
+        }));
+        appendLog(`[Copia local] Guardados ${recorte.length} eventos de los últimos ${DIAS_CACHE} días ` +
+                  `en este navegador (${tamanoAproxKB(json)} KB).`, 'text-cyan-400');
+        return true;
+      } catch (e) {
+        // Cuota superada o almacenamiento bloqueado: no es grave, se sigue sin copia
+        appendLog(`[Copia local] No se pudo guardar (${e.name || e.message}). ` +
+                  `Los datos siguen disponibles en esta sesión.`, 'text-amber-400');
+        return false;
+      }
+    }
+
+    function leerMetaCache() {
+      try {
+        const m = localStorage.getItem(CLAVE_CACHE_META);
+        return m ? JSON.parse(m) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function cargarDeCache() {
+      try {
+        const json = localStorage.getItem(CLAVE_CACHE);
+        if (!json) return null;
+        const regs = JSON.parse(json);
+        if (!Array.isArray(regs) || !regs.length) return null;
+        // Normalizar los campos numéricos, que el JSON guarda como texto o número
+        return regs.map(r => Object.assign({}, r, {
+          latitude: parseFloat(r.latitude),
+          longitude: parseFloat(r.longitude),
+          frp: parseFloat(r.frp) || 0,
+          dist_carretera_km: parseFloat(r.dist_carretera_km) || 0
+        })).filter(r => !isNaN(r.latitude) && !isNaN(r.longitude));
+      } catch (e) {
+        return null;
+      }
+    }
+
+    function borrarCache() {
+      if (!confirm('¿Borrar los datos guardados en este navegador?\n\n' +
+                   'El histórico completo sigue en el repositorio y puedes volver a ' +
+                   'descargarlo con "Actualizar datos".')) return;
+      try {
+        localStorage.removeItem(CLAVE_CACHE);
+        localStorage.removeItem(CLAVE_CACHE_META);
+      } catch (e) {}
+      appendLog('[Copia local] Datos guardados borrados de este navegador.', 'text-amber-400');
+
+      // Volver a los datos incrustados
+      const regs = (HISTORICO_CSV && HISTORICO_CSV.trim())
+        ? parseCSVHistorico(HISTORICO_CSV) : [];
+      datosHistorico = regs;
+      currentFires = regs;
+      fuenteDatos = 'incrustado';
+      fechaCargaDatos = null;
+      poblarFiltrosTemporales();
+      refrescar();
+      actualizarEstadoDatos(0);
+    }
 
     let activeGeoJSON = DEFAULT_AOI_LEONCIO_PRADO;
     let activeZoneName = "Provincia de Leoncio Prado (Huánuco)";
     let activeBBOX = "-76.48,-9.62,-75.62,-8.31";
 
     document.addEventListener('DOMContentLoaded', () => {
-      const today = new Date().toISOString().slice(0, 10);
       updateAOIState("Provincia de Leoncio Prado (Por Defecto)", DEFAULT_AOI_LEONCIO_PRADO);
 
-      // Cargar el histórico real embebido (lo inyecta generar_dashboard.py)
-      if (HISTORICO_CSV && HISTORICO_CSV.trim()) {
-        const regs = parseCSVHistorico(HISTORICO_CSV);
-        datosHistorico = regs;
-        currentFires = regs;
-        appendLog(`[Dashboard] Histórico cargado: ${regs.length} detecciones verificadas contra NASA FIRMS.`, 'text-emerald-400 font-bold');
-        if (regs.length) {
-          const fechas = regs.map(r => r.acq_date).sort();
-          appendLog(`[Dashboard] Rango: ${fechas[0]} a ${fechas[fechas.length - 1]}.`, 'text-slate-400');
+      const incrustados = (HISTORICO_CSV && HISTORICO_CSV.trim())
+        ? parseCSVHistorico(HISTORICO_CSV) : [];
+
+      // 1. Intentar la copia guardada en este navegador (la más reciente)
+      const guardados = cargarDeCache();
+      const meta = leerMetaCache();
+
+      if (guardados && guardados.length) {
+        datosHistorico = guardados;
+        currentFires = guardados;
+        fuenteDatos = 'cache';
+        fechaCargaDatos = meta && meta.guardado ? new Date(meta.guardado) : null;
+
+        const fg = guardados.map(r => r.acq_date).sort();
+        appendLog(`[Copia local] Cargados ${guardados.length} eventos guardados en este navegador.`,
+                  'text-cyan-400 font-bold');
+        appendLog(`[Copia local] Rango: ${fg[0]} a ${fg[fg.length - 1]} · ` +
+                  `guardados el ${fechaCargaDatos ? fechaCargaDatos.toLocaleDateString('es-PE') : '?'}.`,
+                  'text-slate-400');
+
+        // Si el archivo trae eventos más recientes que la copia, avisarlo
+        if (incrustados.length) {
+          const fi = incrustados.map(r => r.acq_date).sort();
+          if (fi[fi.length - 1] > fg[fg.length - 1]) {
+            appendLog(`[Copia local] El archivo incrustado llega hasta ${fi[fi.length - 1]}, ` +
+                      `más reciente que la copia. Pulsa "Actualizar datos" para traer todo.`,
+                      'text-amber-400');
+          }
         }
-        appendLog('[Dashboard] Pulsa "Actualizar datos" para traer los eventos más recientes desde GitHub.', 'text-cyan-400');
+      } else if (incrustados.length) {
+        datosHistorico = incrustados;
+        currentFires = incrustados;
+        fuenteDatos = 'incrustado';
+        appendLog(`[Dashboard] Histórico cargado: ${incrustados.length} detecciones verificadas contra NASA FIRMS.`,
+                  'text-emerald-400 font-bold');
+        const fi = incrustados.map(r => r.acq_date).sort();
+        appendLog(`[Dashboard] Rango: ${fi[0]} a ${fi[fi.length - 1]}.`, 'text-slate-400');
       } else {
-        appendLog('[Dashboard] Sin histórico incrustado. Pulsa "Actualizar datos" o usa "Cargar histórico".', 'text-amber-400');
+        appendLog('[Dashboard] Sin datos. Pulsa "Actualizar datos" o usa "Cargar histórico".', 'text-amber-400');
       }
+
+      appendLog('[Dashboard] Pulsa "Actualizar datos" para traer los eventos más recientes desde GitHub.',
+                'text-cyan-400');
 
       updateFireTable();
       updateTelegramPreview();
@@ -1207,6 +1352,7 @@
       updateTelegramPreview();
       actualizarContadores();
       actualizarResumenPlan();
+      actualizarPanelCache();
       initMap();
       renderCharts();
       actualizarBotonFiltro();
@@ -1544,12 +1690,18 @@
           }
           datosHistorico = regs;
           currentFires = regs;
+          fuenteDatos = 'archivo';
+          fechaCargaDatos = new Date();
           const fechas = regs.map(r => r.acq_date).sort();
           appendLog(`[Histórico] ${regs.length} detecciones cargadas desde ${file.name}`, 'text-emerald-400 font-bold');
           appendLog(`[Histórico] Rango: ${fechas[0]} a ${fechas[fechas.length - 1]} ` +
                     `(${new Set(fechas).size} días).`, 'text-slate-400');
+          // Guardar también esta copia para no perderla al recargar
+          guardarEnCache(regs);
           updateFireTable();
           updateTelegramPreview();
+          poblarFiltrosTemporales();
+          limpiarFiltros();
           initMap();
           renderCharts();
         } catch (err) {
@@ -1599,6 +1751,9 @@
           appendLog('[Datos] No hay eventos nuevos; el dashboard ya estaba al día.', 'text-slate-400');
         }
 
+        // Guardar una copia en el navegador para no volver a descargarla
+        guardarEnCache(regs);
+
         poblarFiltrosTemporales();
         limpiarFiltros();
         actualizarEstadoDatos(nuevos);
@@ -1622,6 +1777,7 @@
         const etiquetas = {
           incrustado: ['Datos incrustados', 'text-emerald-400'],
           github: ['GitHub (en vivo)', 'text-cyan-400'],
+          cache: ['Guardado en este navegador', 'text-cyan-400'],
           archivo: ['Archivo local', 'text-amber-400']
         };
         const [texto, color] = etiquetas[fuenteDatos] || etiquetas.incrustado;
@@ -1631,9 +1787,16 @@
 
       const det = document.getElementById('estado-fuente-detalle');
       if (det) {
-        det.innerText = fuenteDatos === 'incrustado'
-          ? (COBERTURA && COBERTURA.generado ? `Generado el ${COBERTURA.generado}` : 'Del archivo HTML')
-          : 'Descargado con "Actualizar datos"';
+        if (fuenteDatos === 'incrustado') {
+          det.innerText = COBERTURA && COBERTURA.generado
+            ? `Generado el ${COBERTURA.generado}` : 'Del archivo HTML';
+        } else if (fuenteDatos === 'cache') {
+          const meta = leerMetaCache();
+          det.innerText = meta && meta.guardado
+            ? `Guardado el ${new Date(meta.guardado).toLocaleDateString('es-PE')}` : 'Copia local';
+        } else {
+          det.innerText = 'Descargado con "Actualizar datos"';
+        }
       }
 
       const ev = document.getElementById('estado-eventos');
@@ -1675,6 +1838,32 @@
         } else {
           aviso.classList.add('hidden');
         }
+      }
+
+      // Panel de la copia guardada en el navegador
+      actualizarPanelCache();
+    }
+
+    // Panel que informa de la copia guardada en este navegador.
+    // Se llama aparte porque debe refrescarse en cada cambio de selección.
+    function actualizarPanelCache() {
+      const pc = document.getElementById('panel-cache');
+      const pt = document.getElementById('cache-texto');
+      if (!pc || !pt) return;
+
+      const meta = leerMetaCache();
+      if (!meta) { pc.classList.add('hidden'); return; }
+
+      pc.classList.remove('hidden');
+      if (fuenteDatos === 'cache') {
+        pt.innerHTML = `Este navegador guarda <b>${meta.eventos} eventos</b> de los últimos ` +
+          `${meta.dias} días (${meta.desde} a ${meta.hasta}, ~${meta.kb} KB). ` +
+          `<span class="text-slate-500">Se cargan solos al abrir el dashboard, así no hay que ` +
+          `volver a descargarlos.</span>`;
+      } else {
+        pt.innerHTML = `Hay una copia guardada de <b>${meta.eventos} eventos</b> ` +
+          `(${meta.desde} a ${meta.hasta}) de una sesión anterior. ` +
+          `<span class="text-slate-500">Pulsa "Actualizar datos" para usarla.</span>`;
       }
     }
 
