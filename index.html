@@ -445,7 +445,7 @@
             </thead>
             <tbody id="fireTableBody" class="divide-y divide-slate-800/60 font-mono">
               <tr>
-                <td colspan="10" class="p-6 text-center text-slate-500">Ejecuta el pipeline para cargar los focos reales detectados en la tabla.</td>
+                <td colspan="10" class="p-6 text-center text-slate-500">No hay focos que mostrar. Pulsa "Actualizar datos" para traer los más recientes, o ajusta los filtros.</td>
               </tr>
             </tbody>
           </table>
@@ -478,28 +478,27 @@
             <div class="font-bold text-orange-400 flex items-center space-x-1.5">
               <span>🚨 ALERTA DE FOCOS DE CALOR - MONITOREO 🚨</span>
             </div>
-            <p>📅 <b>Fecha del reporte:</b> <span id="tg-date">2026-08-21</span><br>
+            <p>📅 <b>Fecha del reporte:</b> <span id="tg-date">—</span><br>
             📍 <b>Área de Tesis:</b> <span id="tg-zone-name">Provincia de Leoncio Prado (Huánuco)</span><br>
-            🔥 <b>Total anomalías validadas:</b> <code id="tg-count" class="bg-slate-900 text-amber-400 px-1 py-0.5 rounded font-mono">11</code></p>
+            🔥 <b>Total anomalías validadas:</b> <code id="tg-count" class="bg-slate-900 text-amber-400 px-1 py-0.5 rounded font-mono">—</code></p>
             
             <div id="tg-breakdown" class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1">
               <b>📊 Desglose por Sensor:</b><br>
-              &nbsp;&nbsp;• <b>VIIRS_SNPP_NRT:</b> 6 anomalías<br>
-              &nbsp;&nbsp;• <b>VIIRS_NOAA20_NRT:</b> 3 anomalías<br>
-              &nbsp;&nbsp;• <b>MODIS_NRT:</b> 2 anomalías
+              <span class="text-slate-500">Cargando datos...</span>
             </div>
 
             <div id="tg-accessibility" class="bg-slate-900/60 p-2.5 rounded-lg border border-slate-800 space-y-1">
               <b>🛣️ Accesibilidad y Costos de Campo:</b><br>
-              &nbsp;&nbsp;• 🟢 <b>Alta (&lt;1 km):</b> 5 focos (~S/. 5-10)<br>
-              &nbsp;&nbsp;• 🟡 <b>Media (1-3 km):</b> 4 focos (~S/. 15-30)<br>
-              &nbsp;&nbsp;• 🔴 <b>Remota (&gt;3 km):</b> 2 focos (&gt;1h caminata)
+              <span class="text-slate-500">Cargando datos...</span>
             </div>
 
             <div id="tg-links" class="pt-1 text-[11px] text-blue-400 space-y-1"></div>
 
             <div class="border-t border-slate-700/60 pt-2 text-[11px] text-slate-400 italic">
               💡 Adjuntos generados: CSV tabular, Mapa HTML interactivo y archivo KML para GPS offline en celular.
+            </div>
+            <div class="text-[10px] text-slate-500 italic">
+              Este panel refleja la selección de focos que hayas filtrado arriba, no un mensaje real enviado.
             </div>
           </div>
         </div>
@@ -1979,7 +1978,7 @@
     // Download KML
     function downloadKML() {
       if (currentFires.length === 0) {
-        alert('Primero ejecuta el pipeline para obtener datos.');
+        alert('No hay focos en la selección actual. Pulsa "Actualizar datos" o ajusta los filtros.');
         return;
       }
       let kml = `<?xml version="1.0" encoding="UTF-8"?>
