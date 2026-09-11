@@ -105,7 +105,7 @@
 
         <button onclick="switchTab('mapa')" id="tab-btn-mapa" class="tab-btn flex items-center space-x-2 px-3.5 py-2 rounded-lg bg-orange-600/20 text-orange-400 border border-orange-500/30 transition">
           <i data-lucide="map-pin" class="w-4 h-4"></i>
-          <span>Mapa GIS (<span id="badge-map-count">11</span> focos)</span>
+          <span>Mapa GIS (<span id="badge-map-count">—</span> focos)</span>
         </button>
 
         <button onclick="switchTab('entregables')" id="tab-btn-entregables" class="tab-btn flex items-center space-x-2 px-3.5 py-2 rounded-lg text-slate-400 hover:text-white transition">
@@ -142,6 +142,113 @@
   <!-- MAIN CONTENT CONTAINER -->
   <!-- ===================================================================== -->
   <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- ================================================================= -->
+    <!-- RESUMEN DEL HISTÓRICO CARGADO -->
+    <!-- Se rellena solo con los datos incrustados por generar_dashboard.py -->
+    <!-- ================================================================= -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="bg-cardBg border border-borderDark rounded-xl p-3.5">
+        <div class="text-[11px] text-slate-400 font-mono mb-1">Detecciones cargadas</div>
+        <div id="stat-historico" class="text-2xl font-bold text-orange-400">—</div>
+        <div class="text-[10px] text-slate-500 mt-0.5">verificadas contra NASA FIRMS</div>
+      </div>
+      <div class="bg-cardBg border border-borderDark rounded-xl p-3.5">
+        <div class="text-[11px] text-slate-400 font-mono mb-1">Días con detecciones</div>
+        <div id="stat-dias" class="text-2xl font-bold text-cyan-400">—</div>
+        <div id="stat-rango" class="text-[10px] text-slate-500 mt-0.5">—</div>
+      </div>
+      <div class="bg-cardBg border border-borderDark rounded-xl p-3.5">
+        <div class="text-[11px] text-slate-400 font-mono mb-1">Distritos afectados</div>
+        <div id="stat-distritos" class="text-2xl font-bold text-emerald-400">—</div>
+        <div class="text-[10px] text-slate-500 mt-0.5">de los 10 de la provincia</div>
+      </div>
+      <div class="bg-cardBg border border-borderDark rounded-xl p-3.5">
+        <div class="text-[11px] text-slate-400 font-mono mb-1">FRP máximo</div>
+        <div id="stat-frp" class="text-2xl font-bold text-amber-400">—</div>
+        <div class="text-[10px] text-slate-500 mt-0.5">MW (potencia radiativa)</div>
+      </div>
+    </div>
+
+    <!-- ================================================================= -->
+    <!-- FILTRO TEMPORAL: ver los focos por día, semana o rango -->
+    <!-- ================================================================= -->
+    <div class="bg-cardBg border border-borderDark rounded-xl p-4">
+      <div class="flex flex-wrap items-center gap-2 mb-3">
+        <i data-lucide="calendar-days" class="w-4 h-4 text-orange-400"></i>
+        <span class="text-sm font-bold text-slate-200">Filtrar por fecha</span>
+        <span id="filtro-resumen" class="text-[11px] font-mono text-slate-400 ml-1"></span>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <button onclick="aplicarFiltroRapido('todo')" data-filtro="todo"
+                class="filtro-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          Todo el histórico
+        </button>
+        <button onclick="aplicarFiltroRapido('hoy')" data-filtro="hoy"
+                class="filtro-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          Últimas 24 h
+        </button>
+        <button onclick="aplicarFiltroRapido('3d')" data-filtro="3d"
+                class="filtro-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          Últimos 3 días
+        </button>
+        <button onclick="aplicarFiltroRapido('7d')" data-filtro="7d"
+                class="filtro-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          Últimos 7 días
+        </button>
+        <button onclick="aplicarFiltroRapido('30d')" data-filtro="30d"
+                class="filtro-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          Últimos 30 días
+        </button>
+
+        <span class="text-slate-600 mx-1">|</span>
+
+        <select id="filtroSemana" onchange="aplicarFiltroSemana()"
+                class="bg-slate-950 border border-slate-700 px-2 py-1.5 rounded-lg text-slate-200 text-xs">
+          <option value="">— Elegir semana —</option>
+        </select>
+
+        <select id="filtroDia" onchange="aplicarFiltroDia()"
+                class="bg-slate-950 border border-slate-700 px-2 py-1.5 rounded-lg text-slate-200 text-xs">
+          <option value="">— Elegir día —</option>
+        </select>
+
+        <span class="text-slate-600 mx-1">|</span>
+
+        <input type="date" id="filtroDesde"
+               class="bg-slate-950 border border-slate-700 px-2 py-1.5 rounded-lg text-slate-200 text-xs font-mono">
+        <span class="text-slate-500 text-xs">a</span>
+        <input type="date" id="filtroHasta"
+               class="bg-slate-950 border border-slate-700 px-2 py-1.5 rounded-lg text-slate-200 text-xs font-mono">
+        <button onclick="aplicarFiltroRango()"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-orange-600 hover:bg-orange-500 text-white transition">
+          Aplicar rango
+        </button>
+
+        <span class="text-slate-600 mx-1">|</span>
+
+        <select id="filtroDistrito" onchange="aplicarFiltroDistrito()"
+                class="bg-slate-950 border border-slate-700 px-2 py-1.5 rounded-lg text-slate-200 text-xs">
+          <option value="">— Todos los distritos —</option>
+        </select>
+
+        <select id="filtroAnio" onchange="aplicarFiltroAnio()"
+                class="bg-slate-950 border border-slate-700 px-2 py-1.5 rounded-lg text-slate-200 text-xs">
+          <option value="">— Todos los años —</option>
+        </select>
+
+        <button onclick="limpiarFiltros()"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+          Limpiar filtros
+        </button>
+
+        <button onclick="alternarMapaCalor()" id="btn-mapa-calor"
+                class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition">
+          Vista: puntos
+        </button>
+      </div>
+    </div>
 
     <!-- ================================================================= -->
     <!-- TAB 1: SIMULADOR & EJECUTOR PIPELINE EN VIVO -->
@@ -538,6 +645,19 @@
           <canvas id="districtChart" class="max-h-56"></canvas>
         </div>
 
+      </div>
+
+      <!-- Serie temporal: focos por día -->
+      <div class="bg-cardBg border border-borderDark rounded-2xl p-5 shadow-xl">
+        <div class="flex items-center justify-between mb-4">
+          <h4 class="font-bold text-slate-200 text-sm">Focos de calor por día</h4>
+          <span id="serie-resumen" class="text-[11px] font-mono text-slate-400"></span>
+        </div>
+        <canvas id="timelineChart" class="max-h-72"></canvas>
+        <p class="text-[11px] text-slate-500 mt-3 leading-relaxed">
+          Cada barra es un día. Los huecos indican días sin detecciones dentro de la provincia:
+          pueden ser días sin quemas o días con nubosidad que impidió la detección satelital.
+        </p>
       </div>
     </section>
 
@@ -939,6 +1059,21 @@
 -8.83339,-76.10498,,0.43,0.38,2026-09-03,1856,N,VIIRS,n,2.0NRT,,3.8,D,VIIRS_SNPP_NRT,"https://www.google.com/maps/dir/?api=1&destination=-8.83339,-76.10498",1.72,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),MEDIA,30 - 60 min (Trocha / Caminata),S/. 15 - 30,4.2,"🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa",333.97,296.52,Jose Crespo Y Castillo,nominal,2026-09-04,validado
 -9.26335,-75.94128,,0.36,0.57,2026-09-03,1917,N20,VIIRS,n,2.0NRT,,1.16,D,VIIRS_NOAA20_NRT,"https://www.google.com/maps/dir/?api=1&destination=-9.26335,-75.94128",1.84,PE-18A (Carretera Federico Basadre (Tingo María - Pumahuasi - Pucallpa)),MEDIA,30 - 60 min (Trocha / Caminata),S/. 15 - 30,0.8,☀️ Seco (<2mm): Evidencia intacta para muestreo,328.48,292.73,Luyando,nominal,2026-09-04,validado
 -8.91552,-76.1391,,0.35,0.57,2026-09-03,1917,N20,VIIRS,n,2.0NRT,,3.54,D,VIIRS_NOAA20_NRT,"https://www.google.com/maps/dir/?api=1&destination=-8.91552,-76.13910",9.13,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,0.9,☀️ Seco (<2mm): Evidencia intacta para muestreo,338.25,292.79,Jose Crespo Y Castillo,nominal,2026-09-04,validado
+-9.4838,-76.19151,,0.51,0.41,2026-09-04,1856,N20,VIIRS,n,2.0NRT,,6.09,D,VIIRS_NOAA20_NRT,,29.35,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,331.85,293.42,Mariano Damaso Beraun,nominal,2026-09-10,validado
+-9.13914,-76.01737,,0.52,0.5,2026-09-05,1817,N,VIIRS,n,2.0NRT,,3.04,D,VIIRS_SNPP_NRT,,7.48,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,327.59,293.93,Pueblo Nuevo,nominal,2026-09-10,validado
+-9.04474,-76.18448,,0.53,0.5,2026-09-05,1817,N,VIIRS,n,2.0NRT,,14.95,D,VIIRS_SNPP_NRT,,7.76,HU-104 (Carretera Departamental Tingo María - Monzón),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,339.76,293.96,Jose Crespo Y Castillo,nominal,2026-09-10,validado
+-9.46065,-75.97157,,0.39,0.36,2026-09-05,1838,N20,VIIRS,n,2.0NRT,,4.22,D,VIIRS_NOAA20_NRT,,5.73,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,332.56,291.52,Mariano Damaso Beraun,nominal,2026-09-10,validado
+-9.37274,-75.95039,,0.39,0.36,2026-09-05,1838,N20,VIIRS,n,2.0NRT,,4.7,D,VIIRS_NOAA20_NRT,,0.18,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),ALTA,< 20 min (A pie / Mototaxi),S/. 5 - 10,,,338.13,296.46,Mariano Damaso Beraun,nominal,2026-09-10,validado
+-9.25842,-75.95763,,0.39,0.36,2026-09-05,1838,N20,VIIRS,n,2.0NRT,,4.54,D,VIIRS_NOAA20_NRT,,0.8,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),ALTA,< 20 min (A pie / Mototaxi),S/. 5 - 10,,,329.39,299.99,Luyando,nominal,2026-09-10,validado
+-9.2579,-75.95413,,0.39,0.36,2026-09-05,1838,N20,VIIRS,n,2.0NRT,,3.72,D,VIIRS_NOAA20_NRT,,1.13,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),MEDIA,30 - 60 min (Trocha / Caminata),S/. 15 - 30,,,333.05,297.98,Luyando,nominal,2026-09-10,validado
+-9.17501,-76.07847,,0.39,0.36,2026-09-05,1838,N20,VIIRS,n,2.0NRT,,9.8,D,VIIRS_NOAA20_NRT,,5.01,HU-104 (Carretera Departamental Tingo María - Monzón),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,337.21,300.02,Castillo Grande,nominal,2026-09-10,validado
+-9.17252,-76.03949,,0.39,0.36,2026-09-05,1838,N20,VIIRS,n,2.0NRT,,5.64,D,VIIRS_NOAA20_NRT,,7.91,HU-104 (Carretera Departamental Tingo María - Monzón),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,343.26,297.41,Castillo Grande,nominal,2026-09-10,validado
+-9.14229,-76.01907,,0.39,0.36,2026-09-05,1838,N20,VIIRS,n,2.0NRT,,2.53,D,VIIRS_NOAA20_NRT,,7.77,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,336.67,298.69,Pueblo Nuevo,nominal,2026-09-10,validado
+-9.10177,-76.13304,,0.39,0.36,2026-09-05,1838,N20,VIIRS,n,2.0NRT,,3.22,D,VIIRS_NOAA20_NRT,,6.98,HU-104 (Carretera Departamental Tingo María - Monzón),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,333.28,299.0,Rupa-Rupa,nominal,2026-09-10,validado
+-9.0445,-76.18108,,0.39,0.36,2026-09-05,1838,N20,VIIRS,n,2.0NRT,,3.66,D,VIIRS_NOAA20_NRT,,8.03,HU-104 (Carretera Departamental Tingo María - Monzón),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,332.51,296.99,Jose Crespo Y Castillo,nominal,2026-09-10,validado
+-9.34859,-76.1187,314.07,1.27,1.12,2026-09-05,2036,Aqua,MODIS,72,6.1NRT,295.34,14.35,D,MODIS_NRT,,12.95,HU-104 (Carretera Departamental Tingo María - Monzón),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,,,Mariano Damaso Beraun,nominal,2026-09-10,validado
+-9.34697,-76.10709,313.65,1.27,1.12,2026-09-05,2036,Aqua,MODIS,72,6.1NRT,295.02,13.54,D,MODIS_NRT,,12.09,HU-104 (Carretera Departamental Tingo María - Monzón),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,,,Mariano Damaso Beraun,nominal,2026-09-10,validado
+-9.03972,-76.10343,310.77,1.26,1.11,2026-09-05,2036,Aqua,MODIS,68,6.1NRT,296.29,7.77,D,MODIS_NRT,,11.25,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,,,,,Pueblo Nuevo,nominal,2026-09-10,validado
 -9.43986,-75.78671,,0.39,0.36,2026-09-09,1843,N,VIIRS,n,2.0NRT,,5.74,D,VIIRS_SNPP_NRT,"https://www.google.com/maps/dir/?api=1&destination=-9.43986,-75.78671",14.35,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,3.5,"🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa",338.49,298.79,Daniel Alomia Robles,nominal,2026-09-10,validado
 -9.43778,-75.78784,,0.39,0.36,2026-09-09,1843,N,VIIRS,n,2.0NRT,,4.03,D,VIIRS_SNPP_NRT,"https://www.google.com/maps/dir/?api=1&destination=-9.43778,-75.78784",14.29,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,3.5,"🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa",333.58,295.52,Daniel Alomia Robles,nominal,2026-09-10,validado
 -9.27156,-75.90054,,0.39,0.36,2026-09-09,1843,N,VIIRS,n,2.0NRT,,4.48,D,VIIRS_SNPP_NRT,"https://www.google.com/maps/dir/?api=1&destination=-9.27156,-75.90054",0.73,PE-18A (Carretera Federico Basadre (Tingo María - Pumahuasi - Pucallpa)),ALTA,< 20 min (A pie / Mototaxi),S/. 5 - 10,5.7,"🌦️ Lluvia leve (2-8mm): Carbón visible, ceniza dispersa",342.67,298.74,Luyando,nominal,2026-09-10,validado
@@ -956,9 +1091,9 @@
 -8.9639,-76.23411,,0.42,0.46,2026-09-09,1904,N20,VIIRS,n,2.0NRT,,32.28,D,VIIRS_NOAA20_NRT,"https://www.google.com/maps/dir/?api=1&destination=-8.96390,-76.23411",12.96,HU-104 (Carretera Departamental Tingo María - Monzón),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,0.5,☀️ Seco (<2mm): Evidencia intacta para muestreo,341.96,298.73,Jose Crespo Y Castillo,nominal,2026-09-10,validado
 -8.94988,-76.00188,,0.44,0.46,2026-09-09,1904,N20,VIIRS,n,2.0NRT,,7.16,D,VIIRS_NOAA20_NRT,"https://www.google.com/maps/dir/?api=1&destination=-8.94988,-76.00188",2.87,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),MEDIA,30 - 60 min (Trocha / Caminata),S/. 15 - 30,11.2,🌧️ Lluvia fuerte (>8mm): Ceniza probablemente lavada,347.93,293.98,Santo Domingo De Anda,nominal,2026-09-10,validado
 -8.80931,-76.09333,,0.44,0.46,2026-09-09,1904,N20,VIIRS,n,2.0NRT,,2.94,D,VIIRS_NOAA20_NRT,"https://www.google.com/maps/dir/?api=1&destination=-8.80931,-76.09333",0.52,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),ALTA,< 20 min (A pie / Mototaxi),S/. 5 - 10,21.0,🌧️ Lluvia fuerte (>8mm): Ceniza probablemente lavada,333.2,295.13,Pucayacu,nominal,2026-09-10,validado
--8.71039,-76.10432,,0.39,0.36,2026-09-10,1843,N20,VIIRS,n,2.0NRT,,5.68,D,VIIRS_NOAA20_NRT,"https://www.google.com/maps/dir/?api=1&destination=-8.71039,-76.10432",3.96,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,1.9,☀️ Seco (<2mm): Evidencia intacta para muestreo,344.06,299.36,Pucayacu,nominal,2026-09-10,validado
--8.70705,-76.10483,,0.39,0.36,2026-09-10,1843,N20,VIIRS,n,2.0NRT,,5.51,D,VIIRS_NOAA20_NRT,"https://www.google.com/maps/dir/?api=1&destination=-8.70705,-76.10483",4.08,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,1.9,☀️ Seco (<2mm): Evidencia intacta para muestreo,338.38,298.26,Pucayacu,nominal,2026-09-10,validado
--8.61127,-76.09893,,0.39,0.36,2026-09-10,1843,N20,VIIRS,n,2.0NRT,,3.86,D,VIIRS_NOAA20_NRT,"https://www.google.com/maps/dir/?api=1&destination=-8.61127,-76.09893",9.67,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,10.6,🌧️ Lluvia fuerte (>8mm): Ceniza probablemente lavada,335.52,299.02,Pucayacu,nominal,2026-09-10,validado
+-8.71039,-76.10432,,0.39,0.36,2026-09-10,1843,N20,VIIRS,n,2.0NRT,,5.68,D,VIIRS_NOAA20_NRT,"https://www.google.com/maps/dir/?api=1&destination=-8.71039,-76.10432",3.96,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,1.9,☀️ Seco (<2mm): Evidencia intacta para muestreo,344.06,299.36,Pucayacu,nominal,2026-09-11,validado
+-8.70705,-76.10483,,0.39,0.36,2026-09-10,1843,N20,VIIRS,n,2.0NRT,,5.51,D,VIIRS_NOAA20_NRT,"https://www.google.com/maps/dir/?api=1&destination=-8.70705,-76.10483",4.08,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,1.9,☀️ Seco (<2mm): Evidencia intacta para muestreo,338.38,298.26,Pucayacu,nominal,2026-09-11,validado
+-8.61127,-76.09893,,0.39,0.36,2026-09-10,1843,N20,VIIRS,n,2.0NRT,,3.86,D,VIIRS_NOAA20_NRT,"https://www.google.com/maps/dir/?api=1&destination=-8.61127,-76.09893",9.67,PE-5N (Carretera Fernando Belaúnde Terry (Longitudinal Selva Norte)),BAJA / REMOTA,> 1.5 horas (Selva adentro / Bote),S/. 40 - 80+,10.6,🌧️ Lluvia fuerte (>8mm): Ceniza probablemente lavada,335.52,299.02,Pucayacu,nominal,2026-09-11,validado
 `;
 
     // Red vial oficial embebida (aoi_carreteras_leoncio_prado.geojson)
@@ -992,8 +1127,296 @@
 
       updateFireTable();
       updateTelegramPreview();
-      setTimeout(initMap, 200);
+      poblarFiltrosTemporales();
+      actualizarContadores();
+      actualizarBotonFiltro();
+      setTimeout(() => { initMap(); renderCharts(); }, 250);
     });
+
+    // =====================================================================
+    // FILTROS COMBINABLES: temporal (día/semana/rango) + distrito + año
+    // =====================================================================
+    let filtroActivo = 'todo';
+    let filtros = { desde: null, hasta: null, descripcion: 'todo el histórico', distrito: '', anio: '' };
+    let vistaMapaCalor = false;
+
+    // Número de semana ISO (para agrupar por semana)
+    function semanaISO(fechaTexto) {
+      const d = new Date(fechaTexto + 'T00:00:00Z');
+      const dia = (d.getUTCDay() + 6) % 7;              // lunes = 0
+      d.setUTCDate(d.getUTCDate() - dia + 3);           // jueves de la semana
+      const primerJueves = new Date(Date.UTC(d.getUTCFullYear(), 0, 4));
+      const dj = (primerJueves.getUTCDay() + 6) % 7;
+      primerJueves.setUTCDate(primerJueves.getUTCDate() - dj + 3);
+      return 1 + Math.round((d - primerJueves) / (7 * 24 * 3600 * 1000));
+    }
+
+    function fechaMasReciente() {
+      if (!datosHistorico.length) return null;
+      return datosHistorico.map(r => r.acq_date).sort().slice(-1)[0];
+    }
+
+    // Rellena los selectores con lo que hay en el histórico
+    function poblarFiltrosTemporales() {
+      const selDia = document.getElementById('filtroDia');
+      const selSem = document.getElementById('filtroSemana');
+      const selDist = document.getElementById('filtroDistrito');
+      const selAnio = document.getElementById('filtroAnio');
+      if (!selDia || !selSem || !datosHistorico.length) return;
+
+      const porDia = {};
+      const porDist = {};
+      const porAnio = {};
+      datosHistorico.forEach(r => {
+        porDia[r.acq_date] = (porDia[r.acq_date] || 0) + 1;
+        const d = r.distrito || '(sin distrito)';
+        porDist[d] = (porDist[d] || 0) + 1;
+        const a = String(r.acq_date).slice(0, 4);
+        porAnio[a] = (porAnio[a] || 0) + 1;
+      });
+
+      selDia.innerHTML = '<option value="">— Elegir día —</option>';
+      Object.keys(porDia).sort().reverse().forEach(f => {
+        const o = document.createElement('option');
+        o.value = f;
+        o.textContent = `${f}  (${porDia[f]} focos)`;
+        selDia.appendChild(o);
+      });
+
+      const porSem = {};
+      datosHistorico.forEach(r => {
+        const s = semanaISO(r.acq_date);
+        if (!porSem[s]) porSem[s] = { n: 0, min: r.acq_date, max: r.acq_date };
+        porSem[s].n++;
+        if (r.acq_date < porSem[s].min) porSem[s].min = r.acq_date;
+        if (r.acq_date > porSem[s].max) porSem[s].max = r.acq_date;
+      });
+
+      selSem.innerHTML = '<option value="">— Elegir semana —</option>';
+      Object.keys(porSem).map(Number).sort((a, b) => b - a).forEach(s => {
+        const o = document.createElement('option');
+        o.value = s;
+        o.textContent = `Semana ${s}  (${porSem[s].min} a ${porSem[s].max}) · ${porSem[s].n} focos`;
+        selSem.appendChild(o);
+      });
+
+      if (selDist) {
+        selDist.innerHTML = '<option value="">— Todos los distritos —</option>';
+        Object.keys(porDist).sort((a, b) => porDist[b] - porDist[a]).forEach(d => {
+          const o = document.createElement('option');
+          o.value = d;
+          o.textContent = `${d}  (${porDist[d]} focos)`;
+          selDist.appendChild(o);
+        });
+      }
+
+      if (selAnio) {
+        selAnio.innerHTML = '<option value="">— Todos los años —</option>';
+        Object.keys(porAnio).sort().reverse().forEach(a => {
+          const o = document.createElement('option');
+          o.value = a;
+          o.textContent = `${a}  (${porAnio[a]} focos)`;
+          selAnio.appendChild(o);
+        });
+      }
+
+      const fechas = Object.keys(porDia).sort();
+      const d1 = document.getElementById('filtroDesde');
+      const d2 = document.getElementById('filtroHasta');
+      if (d1 && !d1.value) d1.value = fechas[0];
+      if (d2 && !d2.value) d2.value = fechas[fechas.length - 1];
+    }
+
+    // Aplica TODOS los filtros activos y devuelve el resultado
+    function filtrarActual() {
+      let regs = datosHistorico.slice();
+
+      if (filtros.desde) regs = regs.filter(r => r.acq_date >= filtros.desde);
+      if (filtros.hasta) regs = regs.filter(r => r.acq_date <= filtros.hasta);
+      if (filtros.distrito) regs = regs.filter(r => (r.distrito || '(sin distrito)') === filtros.distrito);
+      if (filtros.anio) regs = regs.filter(r => String(r.acq_date).slice(0, 4) === filtros.anio);
+
+      return regs;
+    }
+
+    // Texto que describe la combinación de filtros activa
+    function describirFiltros() {
+      const partes = [filtros.descripcion];
+      if (filtros.distrito) partes.push(`distrito ${filtros.distrito}`);
+      if (filtros.anio) partes.push(`año ${filtros.anio}`);
+      return partes.join(' · ');
+    }
+
+    // Aplica la selección y refresca todas las vistas
+    function aplicarSeleccion(registros, etiqueta) {
+      currentFires = registros;
+      const res = document.getElementById('filtro-resumen');
+      if (res) {
+        const et = etiqueta !== undefined ? etiqueta : describirFiltros();
+        res.innerText = registros.length
+          ? `· mostrando ${registros.length} de ${datosHistorico.length} focos — ${et}`
+          : `· sin focos en ${et}`;
+      }
+      updateFireTable();
+      updateTelegramPreview();
+      actualizarContadores();
+      initMap();
+      renderCharts();
+      actualizarBotonFiltro();
+    }
+
+    function refrescar() { aplicarSeleccion(filtrarActual()); }
+
+    function aplicarFiltroRapido(modo) {
+      filtroActivo = modo;
+      document.getElementById('filtroDia').value = '';
+      document.getElementById('filtroSemana').value = '';
+
+      const ref = fechaMasReciente();
+      if (!ref) { aplicarSeleccion([], 'sin datos'); return; }
+
+      if (modo === 'todo') {
+        filtros.desde = null; filtros.hasta = null;
+        filtros.descripcion = 'todo el histórico';
+        refrescar();
+        return;
+      }
+
+      const dias = { hoy: 1, '3d': 3, '7d': 7, '30d': 30 }[modo];
+      const limite = new Date(ref + 'T00:00:00Z');
+      limite.setUTCDate(limite.getUTCDate() - (dias - 1));
+      filtros.desde = limite.toISOString().slice(0, 10);
+      filtros.hasta = ref;
+
+      const etiquetas = { hoy: 'últimas 24 h', '3d': 'últimos 3 días', '7d': 'últimos 7 días', '30d': 'últimos 30 días' };
+      filtros.descripcion = `${etiquetas[modo]} (${filtros.desde} a ${filtros.hasta})`;
+      refrescar();
+    }
+
+    function aplicarFiltroDia() {
+      const f = document.getElementById('filtroDia').value;
+      if (!f) return;
+      document.getElementById('filtroSemana').value = '';
+      document.getElementById('filtroDesde').value = f;
+      document.getElementById('filtroHasta').value = f;
+      filtroActivo = 'dia';
+      filtros.desde = f; filtros.hasta = f;
+      filtros.descripcion = `el día ${f}`;
+      refrescar();
+    }
+
+    function aplicarFiltroSemana() {
+      const s = document.getElementById('filtroSemana').value;
+      if (!s) return;
+      document.getElementById('filtroDia').value = '';
+      const num = Number(s);
+      const regs = datosHistorico.filter(r => semanaISO(r.acq_date) === num);
+      if (regs.length) {
+        const fechas = regs.map(r => r.acq_date).sort();
+        document.getElementById('filtroDesde').value = fechas[0];
+        document.getElementById('filtroHasta').value = fechas[fechas.length - 1];
+        filtros.desde = fechas[0];
+        filtros.hasta = fechas[fechas.length - 1];
+      }
+      filtroActivo = 'semana';
+      filtros.descripcion = `la semana ${num}`;
+      refrescar();
+    }
+
+    function aplicarFiltroRango() {
+      const d1 = document.getElementById('filtroDesde').value;
+      const d2 = document.getElementById('filtroHasta').value;
+      if (!d1 || !d2) { alert('Elige la fecha de inicio y la de fin.'); return; }
+      if (d1 > d2) { alert('La fecha de inicio no puede ser posterior a la de fin.'); return; }
+      document.getElementById('filtroDia').value = '';
+      document.getElementById('filtroSemana').value = '';
+      filtroActivo = 'rango';
+      filtros.desde = d1; filtros.hasta = d2;
+      filtros.descripcion = `del ${d1} al ${d2}`;
+      refrescar();
+    }
+
+    function aplicarFiltroDistrito() {
+      filtros.distrito = document.getElementById('filtroDistrito').value;
+      refrescar();
+    }
+
+    function aplicarFiltroAnio() {
+      filtros.anio = document.getElementById('filtroAnio').value;
+      refrescar();
+    }
+
+    function limpiarFiltros() {
+      filtroActivo = 'todo';
+      filtros = { desde: null, hasta: null, descripcion: 'todo el histórico', distrito: '', anio: '' };
+      document.getElementById('filtroDia').value = '';
+      document.getElementById('filtroSemana').value = '';
+      document.getElementById('filtroDistrito').value = '';
+      document.getElementById('filtroAnio').value = '';
+      poblarFiltrosTemporales();
+      refrescar();
+    }
+
+    // Alterna entre puntos y mapa de calor (densidad ponderada por FRP)
+    function alternarMapaCalor() {
+      vistaMapaCalor = !vistaMapaCalor;
+      const b = document.getElementById('btn-mapa-calor');
+      if (b) {
+        b.innerText = vistaMapaCalor ? 'Vista: mapa de calor' : 'Vista: puntos';
+        b.className = 'px-3 py-1.5 rounded-lg text-xs font-semibold transition border ' +
+          (vistaMapaCalor ? 'bg-orange-600 text-white border-orange-500'
+                          : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-700');
+      }
+      initMap();
+    }
+
+    // Marca visualmente el botón del filtro activo
+    function actualizarBotonFiltro() {
+      document.querySelectorAll('.filtro-btn').forEach(b => {
+        const activo = b.dataset.filtro === filtroActivo;
+        b.className = 'filtro-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition ' +
+          (activo ? 'bg-orange-600 text-white border border-orange-500'
+                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700');
+      });
+    }
+
+    // Refresca los contadores de la interfaz.
+    // "Detecciones cargadas" y "FRP máximo" se calculan sobre la SELECCIÓN
+    // actual, para que respondan al filtro temporal.
+    function actualizarContadores() {
+      const dataset = currentFires.length ? currentFires : [];
+      const visibles = currentFires.length;
+
+      const badge = document.getElementById('badge-map-count');
+      if (badge) badge.innerText = visibles;
+
+      const elHist = document.getElementById('stat-historico');
+      if (elHist) elHist.innerText = visibles;
+
+      const fechas = visibles ? Array.from(new Set(dataset.map(r => r.acq_date))).sort() : [];
+      const elDias = document.getElementById('stat-dias');
+      if (elDias) elDias.innerText = fechas.length;
+      const elRango = document.getElementById('stat-rango');
+      if (elRango) {
+        elRango.innerText = fechas.length
+          ? (fechas.length === 1 ? fechas[0] : `${fechas[0]} a ${fechas[fechas.length - 1]}`)
+          : 'sin datos en la selección';
+      }
+
+      const elDist = document.getElementById('stat-distritos');
+      if (elDist) {
+        const conDistrito = dataset.filter(
+          r => r.distrito && !r.distrito.startsWith('Leoncio Prado (distrito')
+        );
+        elDist.innerText = new Set(conDistrito.map(r => r.distrito)).size;
+      }
+
+      const elFrp = document.getElementById('stat-frp');
+      if (elFrp) {
+        const frps = dataset.map(r => parseFloat(r.frp)).filter(v => !isNaN(v));
+        elFrp.innerText = frps.length ? Math.max.apply(null, frps).toFixed(1) : '—';
+      }
+    }
 
     function updateAOIState(name, geojson) {
       activeGeoJSON = geojson;
@@ -1669,12 +2092,33 @@
         currentFires.forEach(f => {
           const isModis = (f.source_sensor || '').includes('MODIS');
           const color = isModis ? '#ef4444' : '#f97316';
+
+          // En vista de mapa de calor: el radio crece con el FRP y el color
+          // va de amarillo (poca potencia) a rojo (mucha), para ver de un
+          // vistazo dónde se concentra la energía de las quemas.
+          let radio = isModis ? 8.5 : 6.5;
+          let colorRelleno = color;
+          let opacidad = 0.9;
+          let grosor = 2;
+
+          if (vistaMapaCalor) {
+            const frp = parseFloat(f.frp) || 0;
+            radio = 5 + Math.sqrt(frp) * 2.2;               // proporcional a √FRP
+            colorRelleno = frp >= 50 ? '#7f1d1d'
+                         : frp >= 20 ? '#dc2626'
+                         : frp >= 10 ? '#f97316'
+                         : frp >= 5  ? '#fbbf24'
+                         : '#fde68a';
+            opacidad = 0.55;
+            grosor = 1;
+          }
+
           const marker = L.circleMarker([f.latitude, f.longitude], {
-            radius: isModis ? 8.5 : 6.5,
-            color: '#ffffff',
-            fillColor: color,
-            fillOpacity: 0.9,
-            weight: 2
+            radius: radio,
+            color: vistaMapaCalor ? colorRelleno : '#ffffff',
+            fillColor: colorRelleno,
+            fillOpacity: opacidad,
+            weight: grosor
           }).addTo(markersLayer);
 
           marker.bindPopup(`
@@ -1723,6 +2167,7 @@
     let sensorChartInstance = null;
     let accChartInstance = null;
     let districtChartInstance = null;
+    let timelineChartInstance = null;
 
     function renderCharts() {
       if (currentFires.length === 0) return;
@@ -1768,6 +2213,62 @@
         },
         options: { responsive: true, plugins: { legend: { labels: { color: '#94a3b8' } } } }
       });
+
+      renderTimeline();
+    }
+
+    // Serie temporal: una barra por día. Responde al filtro temporal activo,
+    // así que sirve para analizar la evolución diaria o semanal.
+    function renderTimeline() {
+      const canvas = document.getElementById('timelineChart');
+      if (!canvas || typeof Chart === 'undefined') return;
+
+      const porDia = {};
+      currentFires.forEach(f => { porDia[f.acq_date] = (porDia[f.acq_date] || 0) + 1; });
+
+      const fechas = Object.keys(porDia).sort();
+      const valores = fechas.map(f => porDia[f]);
+      const maximo = valores.length ? Math.max.apply(null, valores) : 0;
+
+      // Resalta el día con más detecciones
+      const colores = valores.map(v => v === maximo ? '#dc2626' : '#ea580c');
+
+      if (timelineChartInstance) timelineChartInstance.destroy();
+      timelineChartInstance = new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: fechas,
+          datasets: [{
+            label: 'Focos de calor',
+            data: valores,
+            backgroundColor: colores,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: ctx => `${ctx.parsed.y} focos el ${ctx.label}`
+              }
+            }
+          },
+          scales: {
+            x: { ticks: { color: '#94a3b8', maxRotation: 60, minRotation: 45 }, grid: { display: false } },
+            y: { beginAtZero: true, ticks: { color: '#94a3b8', precision: 0 }, grid: { color: '#1e293b' } }
+          }
+        }
+      });
+
+      const res = document.getElementById('serie-resumen');
+      if (res) {
+        const total = valores.reduce((a, b) => a + b, 0);
+        res.innerText = fechas.length
+          ? `${fechas.length} días · ${total} focos · máximo ${maximo} en un día`
+          : 'sin datos en la selección';
+      }
     }
 
     // Descarga CSV: exporta el histórico completo que está cargado

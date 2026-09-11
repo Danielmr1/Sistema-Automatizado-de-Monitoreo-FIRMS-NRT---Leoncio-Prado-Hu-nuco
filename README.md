@@ -29,12 +29,15 @@ respaldado contra la respuesta de NASA.
 | Archivo | Función |
 |---|---|
 | `main.py` | Descarga FIRMS, filtra por AOI y confianza, calcula accesibilidad y lluvia, genera CSV/KML/HTML y envía Telegram. |
-| `sincronizar_datos.py` | Ejecuta el ciclo completo en orden (pipeline → fusión → verificación → matriz → dashboard). |
+| `sincronizar_datos.py` | Ejecuta el ciclo completo en orden (pipeline → fusión → verificación → integridad → distritos → matriz → dashboard). |
 | `fusionar_historico.py` | Une el histórico local con el del repositorio sin perder registros. |
 | `verificar_historico.py` | Contrasta el histórico contra NASA FIRMS y emite un informe. |
+| `verificar_integridad.py` | **Detecta y recupera días perdidos.** La API solo conserva 5 días: sin este paso, una detección no guardada es irrecuperable. Distingue "día sin quemas" de "día no registrado". |
+| `recuperar_dias.py` | Recupera manualmente una ventana de fechas concreta desde FIRMS. |
+| `fusionar_registro.py` | Une el registro de ejecuciones local con el del repositorio (evita perder entradas). |
 | `generar_matriz_campo.py` | Genera la matriz de salidas a campo desde el histórico verificado. |
 | `generar_dashboard.py` | Incrusta el histórico y la red vial reales en `index.html`. |
-| `reparar_distritos.py` | Asigna distrito a los registros ya guardados que no pasaron por el pipeline. |
+| `reparar_distritos.py` | Asigna distrito y recalcula distancias viales en los registros ya guardados. |
 
 ### Datos
 | Archivo | Función |

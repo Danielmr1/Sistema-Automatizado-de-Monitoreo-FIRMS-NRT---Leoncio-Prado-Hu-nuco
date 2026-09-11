@@ -14,6 +14,8 @@ pendientes, SIN tocar las coordenadas ni ningún dato de FIRMS.
 
 Campos que repara:
   - distrito            (si falta o tiene la etiqueta provisional)
+  - dist_carretera_km   (recalculada con la red vial oficial actual, de 5 tramos)
+  - accesibilidad, tiempo_estimado, costo_estimado_pen (derivados de la distancia)
 
 Uso:
     python reparar_distritos.py
@@ -22,6 +24,7 @@ Uso:
 
 import os
 import sys
+import json
 import shutil
 import argparse
 import datetime
@@ -51,9 +54,11 @@ def leer_csv(path):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Repara el distrito de los registros antiguos")
+    parser = argparse.ArgumentParser(
+        description="Repara metadatos del histórico: distrito y distancias viales")
     parser.add_argument("--historico", default=HIST_PATH)
     parser.add_argument("--distritos", default="distritos_leoncio_prado.geojson")
+    parser.add_argument("--carreteras", default="aoi_carreteras_leoncio_prado.geojson")
     args = parser.parse_args()
 
     if not os.path.exists(args.historico):
@@ -76,29 +81,36 @@ def main():
     if "distrito" not in hist.columns:
         hist["distrito"] = ""
 
+    # Ojo: un valor nulo (NaN) se convierte en la cadena "nan" con astype(str),
+    # que no es igual a "" ni a la etiqueta provisional. Por eso se comprueba
+    # también con isna() de forma explícita.
     distrito_txt = hist["distrito"].astype(str).str.strip()
-    pendientes = (distrito_txt == "") | (distrito_txt == ETIQUETA_PROVISIONAL)
+    pendientes = (
+        hist["distrito"].isna()
+        | (distrito_txt == "")
+        | (distrito_txt.str.lower() == "nan")
+        | (distrito_txt == ETIQUETA_PROVISIONAL)
+    )
     print(f"[Reparación] Registros con distrito pendiente: {pendientes.sum()}")
 
-    if pendientes.sum() == 0:
-        print("[Reparación] Nada que reparar. El distrito ya está completo.")
-        return 0
-
     asignados = {}
-    for idx in hist.index[pendientes]:
-        lon = float(hist.at[idx, "longitude"])
-        lat = float(hist.at[idx, "latitude"])
-        nombre = None
-        for dist, anillos in distritos.items():
-            for ring in anillos:
-                if m._point_in_polygon(lon, lat, ring):
-                    nombre = dist
+    if pendientes.sum() == 0:
+        print("[Reparación] El distrito ya está completo; no hay nada que asignar.")
+    else:
+        for idx in hist.index[pendientes]:
+            lon = float(hist.at[idx, "longitude"])
+            lat = float(hist.at[idx, "latitude"])
+            nombre = None
+            for dist, anillos in distritos.items():
+                for ring in anillos:
+                    if m._point_in_polygon(lon, lat, ring):
+                        nombre = dist
+                        break
+                if nombre:
                     break
             if nombre:
-                break
-        if nombre:
-            hist.at[idx, "distrito"] = nombre
-            asignados[nombre] = asignados.get(nombre, 0) + 1
+                hist.at[idx, "distrito"] = nombre
+                asignados[nombre] = asignados.get(nombre, 0) + 1
 
     resueltos = sum(asignados.values())
     no_resueltos = int(pendientes.sum()) - resueltos
@@ -110,7 +122,53 @@ def main():
     for nombre, n in sorted(asignados.items(), key=lambda x: -x[1]):
         print(f"   {nombre:28s} {n:4d}")
 
-    respaldo = f"{args.historico}.bak_distritos_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    # --- Recalcular distancias viales con la red oficial actual ---
+    # La red vial del proyecto pasó de 3 ejes a los 5 tramos del GeoJSON del MTC
+    # (se añadieron las trochas VEC-ANDA y VEC-NARANJILLO). Los registros
+    # antiguos conservan la distancia calculada con la red vieja, así que
+    # quedan sobreestimados si el foco está junto a una trocha.
+    print("\n[Vías] Recalculando distancias con la red vial oficial...")
+    roads = None
+    if os.path.exists(args.carreteras):
+        with open(args.carreteras, "r", encoding="utf-8") as f:
+            roads = json.load(f)
+        print(f"[Vías] {len(roads.get('features', []))} tramos cargados desde {args.carreteras}.")
+    else:
+        print(f"[Vías Warning] No existe {args.carreteras}; se omite el recálculo.")
+
+    if roads:
+        recalcular = hist[["latitude", "longitude"]].copy()
+        resultado = m.calculate_road_accessibility_and_costs(recalcular, roads)
+
+        cambios = 0
+        detalle = []
+        for i in range(len(hist)):
+            vieja = hist.iloc[i].get("dist_carretera_km")
+            nueva = resultado["dist_carretera_km"].iloc[i]
+            try:
+                cambio = abs(float(vieja) - float(nueva)) > 0.02
+            except (TypeError, ValueError):
+                cambio = True
+            if cambio:
+                cambios += 1
+                detalle.append((hist.at[hist.index[i], "latitude"],
+                                hist.at[hist.index[i], "longitude"],
+                                vieja, nueva,
+                                str(hist.iloc[i].get("accesibilidad")),
+                                resultado["accesibilidad"].iloc[i]))
+
+        hist["dist_carretera_km"] = resultado["dist_carretera_km"].values
+        hist["carretera_cercana"] = resultado["carretera_cercana"].values
+        hist["accesibilidad"] = resultado["accesibilidad"].values
+        hist["tiempo_estimado"] = resultado["tiempo_estimado"].values
+        hist["costo_estimado_pen"] = resultado["costo_estimado_pen"].values
+
+        print(f"[Vías] Distancias actualizadas: {cambios} de {len(hist)} cambiaron.")
+        for lat, lon, v, n, av, an in detalle[:10]:
+            marca = "  <-- cambia de categoría" if av != an else ""
+            print(f"   ({lat:.5f},{lon:.5f})  {v} -> {n} km  [{av} -> {an}]{marca}")
+
+    respaldo = f"{args.historico}.bak_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
     shutil.copy2(args.historico, respaldo)
     hist.to_csv(args.historico, index=False, encoding="utf-8-sig")
 

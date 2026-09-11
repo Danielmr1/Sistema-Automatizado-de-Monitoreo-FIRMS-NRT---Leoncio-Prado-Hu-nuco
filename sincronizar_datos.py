@@ -78,6 +78,8 @@ def main():
     parser.add_argument("--dias", default="2", help="Ventana NRT a consultar (1 a 5). Por defecto 2")
     parser.add_argument("--matriz-dias", type=int, default=30, help="Ventana de la matriz de campo")
     parser.add_argument("--sin-verificar", action="store_true", help="Omitir el contraste contra FIRMS")
+    parser.add_argument("--sin-integridad", action="store_true",
+                        help="Omitir la comprobación de huecos y la recuperación de días perdidos")
     parser.add_argument("--sin-dashboard", action="store_true", help="Omitir la regeneración del dashboard")
     args = parser.parse_args()
 
@@ -121,6 +123,24 @@ def main():
               f'{HISTORICO}"')
         resultados["fusion"] = None
 
+    # --- 2b. Fusión del registro de ejecuciones ---
+    # El workflow y las corridas locales escriben cada uno su propio registro.
+    # Sin fusionarlos, subir el local borraría las entradas del repositorio.
+    if os.path.exists("_gh_registro.csv"):
+        ok, _ = ejecutar(
+            "2b. Fusión del registro de ejecuciones",
+            [py, "fusionar_registro.py", "--repo", "_gh_registro.csv"],
+        )
+        resultados["registro"] = ok
+    else:
+        print("\n" + "=" * 72)
+        print("PASO: 2b. Fusión del registro de ejecuciones")
+        print("=" * 72)
+        print("   Omitido: no existe _gh_registro.csv.")
+        print("   Para traerlo desde GitHub:")
+        print('   python fusionar_registro.py --descargar')
+        resultados["registro"] = None
+
     # --- 3. Verificación contra NASA FIRMS ---
     if not args.sin_verificar:
         hoy = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d")
@@ -132,32 +152,51 @@ def main():
     else:
         resultados["verificacion"] = None
 
-    # --- 4. Reparación de metadatos derivados (distrito) ---
+    # --- 4. Integridad: detectar y recuperar días perdidos ---
+    # La API de FIRMS solo conserva 5 días. Este paso compara el histórico con
+    # la ventana recuperable y repara cualquier detección no guardada ANTES de
+    # que sea irrecuperable.
+    if not args.sin_integridad:
+        ok, salida = ejecutar(
+            "4. Integridad del histórico (recuperación de días perdidos)",
+            [py, "verificar_integridad.py"],
+        )
+        resultados["integridad"] = ok
+        if ok and "Recuperado]" in salida:
+            print("\n   Se recuperaron detecciones: se reasignan distrito y vías.")
+            ejecutar(
+                "4b. Reparación de metadatos tras la recuperación",
+                [py, "reparar_distritos.py", "--historico", HISTORICO],
+            )
+    else:
+        resultados["integridad"] = None
+
+    # --- 5. Reparación de metadatos derivados (distrito) ---
     # Los registros que ya estaban en el histórico no pasan por el pipeline,
     # así que su distrito se rellena aquí, sin volver a descargar detecciones.
     if os.path.exists("distritos_leoncio_prado.geojson"):
         ok, _ = ejecutar(
-            "4. Reparación de distrito en registros antiguos",
+            "5. Reparación de distrito en registros antiguos",
             [py, "reparar_distritos.py", "--historico", HISTORICO],
         )
         resultados["reparacion"] = ok
     else:
         print("\n" + "=" * 72)
-        print("PASO: 4. Reparación de distrito en registros antiguos")
+        print("PASO: 5. Reparación de distrito en registros antiguos")
         print("=" * 72)
         print("   Omitido: falta distritos_leoncio_prado.geojson.")
         resultados["reparacion"] = None
 
-    # --- 5. Matriz de campo ---
+    # --- 6. Matriz de campo ---
     ok, _ = ejecutar(
-        "5. Matriz de salidas a campo",
+        "6. Matriz de salidas a campo",
         [py, "generar_matriz_campo.py", "--dias", str(args.matriz_dias)],
     )
     resultados["matriz"] = ok
 
-    # --- 6. Dashboard ---
+    # --- 7. Dashboard ---
     if not args.sin_dashboard:
-        ok, _ = ejecutar("6. Dashboard con datos reales", [py, "generar_dashboard.py"])
+        ok, _ = ejecutar("7. Dashboard con datos reales", [py, "generar_dashboard.py"])
         resultados["dashboard"] = ok
     else:
         resultados["dashboard"] = None
@@ -172,7 +211,9 @@ def main():
     etiquetas = {
         "pipeline": "Descarga FIRMS y pipeline",
         "fusion": "Fusión con repo",
+        "registro": "Fusión del registro de ejecuciones",
         "verificacion": "Verificación contra FIRMS",
+        "integridad": "Integridad y recuperación",
         "reparacion": "Reparación de distrito",
         "matriz": "Matriz de campo",
         "dashboard": "Dashboard",
