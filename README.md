@@ -35,6 +35,7 @@ respaldado contra la respuesta de NASA.
 | `verificar_integridad.py` | **Detecta y recupera días perdidos.** La API solo conserva 5 días: sin este paso, una detección no guardada es irrecuperable. Distingue "día sin quemas" de "día no registrado". |
 | `recuperar_dias.py` | Recupera manualmente una ventana de fechas concreta desde FIRMS. |
 | `fusionar_registro.py` | Une el registro de ejecuciones local con el del repositorio (evita perder entradas). |
+| `descargar_vias_osm.py` | Descarga la red vial **real** desde OpenStreetMap (259 tramos dentro del AOI, frente a los 3-14 vértices del archivo original). |
 | `generar_matriz_campo.py` | Genera la matriz de salidas a campo desde el histórico verificado. |
 | `generar_dashboard.py` | Incrusta el histórico y la red vial reales en `index.html`. |
 | `reparar_distritos.py` | Asigna distrito y recalcula distancias viales en los registros ya guardados. |
@@ -51,9 +52,22 @@ respaldado contra la respuesta de NASA.
 ### Documentos y visor
 | Archivo | Función |
 |---|---|
-| `index.html` | Dashboard: mapa, tabla, gráficos y descarga. Lleva los datos incrustados. |
+| `index.html` | Dashboard **de solo visualización**: panel de estado, mapa, mapa de calor, filtros por fecha/distrito/año, gráficos, descargas y botón "Actualizar datos". |
 | `EVENTOS_QUEMAS_CAMPO_TESIS.md` | Matriz de salidas a campo (generada, no editada a mano). |
 | `README.md`, `GUIA_CONFIGURACION_Y_CAMPO.md` | Documentación. |
+
+### Cómo se actualiza el dashboard
+
+El dashboard **no ejecuta nada**: solo muestra lo que el workflow ya recogió.
+
+* **Al abrirlo**: usa los datos incrustados por `generar_dashboard.py` (últimos 12 meses).
+* **Botón "Actualizar datos"**: descarga el histórico más reciente desde GitHub. Es manual
+  a propósito, para no consumir datos móviles sin que el usuario lo pida.
+* **Botón "Cargar histórico"**: abre un CSV de tu equipo, útil sin conexión.
+* **Sin internet**: sigue funcionando con los datos incrustados.
+
+Si el dashboard no incluye todos los eventos del histórico, muestra un aviso indicando
+cuántos quedaron fuera y cómo verlos.
 
 ### Automatización
 `.github/workflows/firms_scouting.yml` ejecuta el pipeline a diario a las 12:00 UTC

@@ -335,11 +335,11 @@ def calculate_road_accessibility_and_costs(df: pd.DataFrame, roads_geojson=None)
         ]}
     ]
 
-    # Preferir la geometría vial oficial cuando está disponible
+    # Preferir la geometría vial del archivo cuando está disponible
     segmentos_oficiales = _coords_to_road_segments(roads_geojson)
     if segmentos_oficiales:
         road_segments = segmentos_oficiales
-        distancias_metodo = "geometría oficial del MTC"
+        distancias_metodo = f"red vial del archivo ({len(segmentos_oficiales)} tramos)"
     else:
         distancias_metodo = "trazado de respaldo (simplificado)"
 
@@ -372,7 +372,18 @@ def calculate_road_accessibility_and_costs(df: pd.DataFrame, roads_geojson=None)
 
         dist_km = round(best_dist, 2)
         min_distances.append(dist_km)
-        nearest_names.append(f"{best_road['code']} ({best_road['name']})")
+
+        # Etiqueta legible: evita "SIN-REF (nombre)" cuando la vía no tiene código
+        cod = str(best_road.get("code", "") or "").strip()
+        nom = str(best_road.get("name", "") or "").strip()
+        if cod and cod.upper() not in ("SIN-REF", "N/D") and nom and nom != cod:
+            nearest_names.append(f"{cod} ({nom})")
+        elif nom:
+            nearest_names.append(nom)
+        elif cod:
+            nearest_names.append(cod)
+        else:
+            nearest_names.append("Vía sin identificar")
 
         if dist_km <= 1.0:
             access_levels.append("ALTA")

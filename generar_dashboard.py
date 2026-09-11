@@ -25,6 +25,7 @@ import pandas as pd
 
 MARCA_CSV = re.compile(r"const HISTORICO_CSV = `.*?`;", re.DOTALL)
 MARCA_ROADS = re.compile(r"const ROADS_GEOJSON = /\*ROADS_GEOJSON\*/.*?/\*ROADS_GEOJSON\*/;", re.DOTALL)
+MARCA_META = re.compile(r"const COBERTURA = /\*COBERTURA\*/.*?/\*COBERTURA\*/;", re.DOTALL)
 
 
 def cargar_historico(path):
@@ -68,8 +69,10 @@ def main():
     parser.add_argument("--dashboard", default="index.html")
     parser.add_argument("--historico", default="historico_leoncio_prado_2026.csv")
     parser.add_argument("--carreteras", default="aoi_carreteras_leoncio_prado.geojson")
-    parser.add_argument("--max-registros", type=int, default=0,
-                        help="Limitar a los N registros más recientes (0 = todos).")
+    parser.add_argument("--dias-minimos", type=int, default=365,
+                        help="Ventana temporal a incrustar, en dias. Por defecto 365 (12 meses).")
+    parser.add_argument("--max-eventos", type=int, default=6000,
+                        help="Tope de seguridad de eventos incrustados. Por defecto 6000.")
     args = parser.parse_args()
 
     if not os.path.exists(args.dashboard):
@@ -78,15 +81,55 @@ def main():
     with open(args.dashboard, "r", encoding="utf-8") as f:
         html = f.read()
 
-    # --- 1. Histórico ---
-    df = cargar_historico(args.historico)
-    if args.max_registros and len(df) > args.max_registros:
-        df = df.sort_values(["acq_date", "acq_time"]).tail(args.max_registros)
-        print(f"[Histórico] Limitado a los {len(df)} registros más recientes.")
+    # --- 1. Histórico: ventana de 12 meses con tope de seguridad ---
+    df_completo = cargar_historico(args.historico)
+    total_historico = len(df_completo)
+    df = df_completo.sort_values(["acq_date", "acq_time"]).copy()
+
+    # a) ventana temporal
+    fechas = pd.to_datetime(df["acq_date"])
+    corte = fechas.max() - pd.Timedelta(days=args.dias_minimos - 1)
+    dentro_ventana = fechas >= corte
+    df = df[dentro_ventana]
+
+    recorte_tiempo = total_historico - len(df)
+
+    # b) tope de seguridad
+    recorte_tope = 0
+    if args.max_eventos and len(df) > args.max_eventos:
+        recorte_tope = len(df) - args.max_eventos
+        df = df.tail(args.max_eventos)
+        print(f"[Histórico] AVISO: se alcanzó el tope de {args.max_eventos} eventos; "
+              f"{recorte_tope} quedan fuera del dashboard.")
+
+    df = df.reset_index(drop=True)
+    fuera = recorte_tiempo + recorte_tope
+
+    print(f"[Histórico] Incluidos {len(df)} de {total_historico} eventos "
+          f"(ventana {args.dias_minimos} dias"
+          + (f", tope {args.max_eventos}" if recorte_tope else "") + ").")
+    if fuera:
+        print(f"[Histórico] {fuera} eventos anteriores NO estan incrustados; "
+              f"el dashboard lo indicara en pantalla.")
 
     csv_txt = escapar_para_template(csv_a_texto(df))
     nuevo_csv = f"const HISTORICO_CSV = `{csv_txt}`;"
     html, n_csv = MARCA_CSV.subn(lambda _: nuevo_csv, html, count=1)
+
+    # --- 1b. Metadatos de cobertura, para que el dashboard avise del recorte ---
+    meta = {
+        "total_historico": int(total_historico),
+        "incluidos": int(len(df)),
+        "fuera": int(fuera),
+        "dias_minimos": int(args.dias_minimos),
+        "max_eventos": int(args.max_eventos),
+        "generado": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d"),
+        "fecha_min": str(df["acq_date"].min()) if len(df) else "",
+        "fecha_max": str(df["acq_date"].max()) if len(df) else "",
+    }
+    meta_json = json.dumps(meta, ensure_ascii=False)
+    html, n_meta = MARCA_META.subn(
+        lambda _: f"const COBERTURA = /*COBERTURA*/{meta_json}/*COBERTURA*/;", html, count=1)
 
     # --- 2. Red vial ---
     if os.path.exists(args.carreteras):
@@ -104,6 +147,8 @@ def main():
 
     if n_csv != 1:
         raise SystemExit("[Error] No se encontró el bloque 'const HISTORICO_CSV' en el dashboard.")
+    if n_meta != 1:
+        raise SystemExit("[Error] No se encontró el bloque 'const COBERTURA' en el dashboard.")
     if n_roads != 1:
         raise SystemExit("[Error] No se encontró el bloque 'const ROADS_GEOJSON' en el dashboard.")
 
