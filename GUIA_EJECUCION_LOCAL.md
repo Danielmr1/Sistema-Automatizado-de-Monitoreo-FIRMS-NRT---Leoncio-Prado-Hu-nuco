@@ -115,6 +115,25 @@ la página publicada refleje los cambios.
 
 ### Antes de una salida a campo
 
+Hay **dos formas** de obtener el plan de campo. La del dashboard es la más cómoda; la de
+PowerShell sirve cuando quieres el documento reproducible para la tesis.
+
+#### Opción A — Desde el dashboard (recomendada para el día de campo)
+
+1. Abre el dashboard (el publicado o el `index.html` local).
+2. Pulsa **"Actualizar datos"** para traer los focos recientes.
+3. Ajusta los filtros: rango de fechas (por ejemplo "Últimos 3 días") y el selector de
+   **accesibilidad**.
+4. Revisa que los focos que aparecen en el mapa y la tabla son los que esperas.
+5. Ve a la pestaña **"Descargar Alertas (CSV/KML)"** y pulsa **"Descargar plan de campo"**.
+
+Se descarga `plan_campo_<fecha>.md` con los focos de tu selección. El panel te dice antes
+cuántos focos incluirá, para que no descargues un plan vacío sin darte cuenta.
+
+**Ventaja:** puedes verificar en el mapa antes de descargar, y funciona desde el celular.
+
+#### Opción B — Desde PowerShell (para la tesis)
+
 ```powershell
 cd "D:\Monitoreo de quemas"
 
@@ -130,13 +149,47 @@ py generar_matriz_campo.py --dias 3 --solo-accesibles
 # 4. Subir index.html al repositorio (a mano, con Add file -> Upload files)
 ```
 
-**Por qué el paso 3 usa `--dias 3`:** en selva alta la evidencia se degrada rápido. Después de
-48 horas la ceniza se lava con la lluvia y a los 7 días ya no se delimita el perímetro de la
-quema. No tiene sentido viajar a verificar algo de hace un mes.
+**Ventaja:** el documento queda reproducible y auditable, con el archivo de origen y la fecha
+en el encabezado. Un jurado puede verificar cómo se generó.
 
-**Por qué `--solo-accesibles`:** descarta los focos de acceso "BAJA / REMOTA", que requieren
-bote o más de 1,5 horas de caminata. Con pocos días de campo no conviene gastarlos en un
-punto remoto.
+Ambas opciones producen **los mismos focos**. Se verificó comparando las coordenadas de los
+dos métodos con los datos reales: 9 focos, coincidencia total.
+
+**Por qué conviene usar `--dias 3` (o el filtro equivalente):** en selva alta la evidencia se
+degrada rápido. Después de 48 horas la ceniza se lava con la lluvia y a los 7 días ya no se
+delimita el perímetro de la quema. No tiene sentido viajar a verificar algo de hace un mes.
+
+**Por qué filtrar por accesibilidad:** descarta los focos de acceso "BAJA / REMOTA", que
+requieren bote o más de 1,5 horas de caminata. Con pocos días de campo no conviene gastarlos
+en un punto remoto.
+
+### Filtros disponibles en el dashboard
+
+En la barra "Filtrar por fecha" puedes combinar libremente:
+
+| Filtro | Opciones |
+| :--- | :--- |
+| Rango temporal | Todo · 24 h · 3 días · 7 días · 30 días · día concreto · semana ISO · rango a mano |
+| Distrito | Los 10 distritos, con el conteo de cada uno |
+| Año | Para comparar temporadas entre años |
+| **Accesibilidad** | Alta (<1 km) · Media (1-3 km) · Remota (>3 km) |
+
+El **plan de campo se genera con la combinación de filtros que tengas activa**, incluida la
+accesibilidad. Por eso el flujo es: filtrar → revisar en el mapa → descargar el plan.
+
+### Dos documentos distintos: catálogo y plan
+
+Hay **dos formas** de obtener el plan, y producen **documentos distintos** a propósito:
+
+| Documento | Quién lo genera | Ventana | Para qué |
+| :--- | :--- | :--- | :--- |
+| `EVENTOS_QUEMAS_CAMPO_TESIS.md` | Python (PowerShell) | 30 días | **Catálogo** de la temporada, reproducible y auditable |
+| `plan_campo_<fecha>.md` | Python **o** el dashboard | 3 días, accesibles | **Plan de viaje** del día |
+
+El script de Python decide solo: si usas `--dias` de 7 o menos, o `--solo-accesibles`, escribe
+en `plan_campo_<fecha>.md` y **no toca el catálogo**. Solo sobrescribe el catálogo cuando
+generas una ventana larga sin filtro de accesibilidad. También puedes forzarlo con `--plan`, o
+elegir el nombre con `--salida archivo.md`.
 
 ### Parámetros de la matriz de campo
 
@@ -145,7 +198,9 @@ punto remoto.
 | `--dias N` | Antigüedad máxima de los focos (por defecto 30) |
 | `--solo-accesibles` | Solo accesibilidad ALTA y MEDIA |
 | `--top N` | Los N focos de mayor FRP por grupo |
-| `--salida archivo.md` | Otro nombre de archivo de salida |
+| `--plan` | Fuerza la salida a `plan_campo_<fecha>.md` |
+| `--salida archivo.md` | Nombre de archivo concreto |
+| `--fecha-ref YYYY-MM-DD` | Fecha de referencia (por defecto, hoy) |
 
 ---
 

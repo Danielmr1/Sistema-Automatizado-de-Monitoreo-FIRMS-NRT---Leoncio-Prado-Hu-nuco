@@ -238,6 +238,12 @@
           <option value="">— Todos los años —</option>
         </select>
 
+        <select id="filtroAccesibilidad" onchange="aplicarFiltroAccesibilidad()"
+                class="bg-slate-950 border border-slate-700 px-2 py-1.5 rounded-lg text-slate-200 text-xs"
+                title="Filtra por facilidad de acceso al foco">
+          <option value="">— Toda accesibilidad —</option>
+        </select>
+
         <button onclick="limpiarFiltros()"
                 class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
           Limpiar filtros
@@ -413,8 +419,16 @@
           <div>
             <h3 class="text-lg font-bold text-slate-100">Entregables Generados para Trabajo de Campo</h3>
             <p class="text-xs text-slate-400">Descarga los archivos generados listos para importar en Google Earth, OruxMaps o tu tesis.</p>
+            <p class="text-[11px] text-amber-300/90 mt-1">
+              <b>Plan de campo:</b> genera la lista de salida usando los filtros que tengas aplicados arriba.
+              Filtra primero (por ejemplo "últimos 3 días") y luego descárgalo.
+            </p>
           </div>
-          <div class="flex items-center space-x-2">
+          <div class="flex flex-wrap items-center gap-2">
+            <button onclick="descargarPlanCampo()" class="bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center space-x-2 transition">
+              <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+              <span>Descargar plan de campo</span>
+            </button>
             <button onclick="downloadCSV()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-4 py-2 rounded-xl flex items-center space-x-2 transition">
               <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
               <span>Descargar CSV</span>
@@ -424,6 +438,11 @@
               <span>Descargar KML</span>
             </button>
           </div>
+        </div>
+
+        <!-- Aviso de lo que generará el plan -->
+        <div id="plan-resumen" class="hidden bg-slate-900/70 border border-slate-800 rounded-xl p-3">
+          <div class="text-[11px] text-slate-300 leading-relaxed" id="plan-resumen-texto"></div>
         </div>
 
         <!-- Dynamic Table -->
@@ -1027,7 +1046,8 @@
     // FILTROS COMBINABLES: temporal (día/semana/rango) + distrito + año
     // =====================================================================
     let filtroActivo = 'todo';
-    let filtros = { desde: null, hasta: null, descripcion: 'todo el histórico', distrito: '', anio: '' };
+    let filtros = { desde: null, hasta: null, descripcion: 'todo el histórico',
+                    distrito: '', anio: '', accesibilidad: '' };
     let vistaMapaCalor = false;
 
     // Número de semana ISO (para agrupar por semana)
@@ -1110,6 +1130,32 @@
         });
       }
 
+      // Selector de accesibilidad: las tres categorías con su conteo
+      const selAcc = document.getElementById('filtroAccesibilidad');
+      if (selAcc) {
+        const porAcc = {};
+        datosHistorico.forEach(r => {
+          const a = r.accesibilidad || '(sin dato)';
+          porAcc[a] = (porAcc[a] || 0) + 1;
+        });
+        const orden = ['ALTA', 'MEDIA', 'BAJA / REMOTA'];
+        const claves = orden.filter(k => porAcc[k]).concat(
+          Object.keys(porAcc).filter(k => !orden.includes(k)));
+
+        selAcc.innerHTML = '<option value="">— Toda accesibilidad —</option>';
+        claves.forEach(k => {
+          const o = document.createElement('option');
+          o.value = k;
+          // Etiqueta entendible: la categoría técnica va entre paréntesis
+          const etiqueta = k === 'ALTA' ? 'Alta (menos de 1 km)'
+                         : k === 'MEDIA' ? 'Media (1 a 3 km)'
+                         : k === 'BAJA / REMOTA' ? 'Remota (más de 3 km)'
+                         : k;
+          o.textContent = `${etiqueta}  (${porAcc[k]} focos)`;
+          selAcc.appendChild(o);
+        });
+      }
+
       const fechas = Object.keys(porDia).sort();
       const d1 = document.getElementById('filtroDesde');
       const d2 = document.getElementById('filtroHasta');
@@ -1125,6 +1171,9 @@
       if (filtros.hasta) regs = regs.filter(r => r.acq_date <= filtros.hasta);
       if (filtros.distrito) regs = regs.filter(r => (r.distrito || '(sin distrito)') === filtros.distrito);
       if (filtros.anio) regs = regs.filter(r => String(r.acq_date).slice(0, 4) === filtros.anio);
+      if (filtros.accesibilidad) regs = regs.filter(r => r.accesibilidad === filtros.accesibilidad);
+      if (filtros.accesibles) regs = regs.filter(r => ['ALTA', 'MEDIA'].includes(r.accesibilidad));
+      if (filtros.soloValidados) regs = regs.filter(r => r.tipo_registro !== 'baja_confianza');
 
       return regs;
     }
@@ -1134,6 +1183,13 @@
       const partes = [filtros.descripcion];
       if (filtros.distrito) partes.push(`distrito ${filtros.distrito}`);
       if (filtros.anio) partes.push(`año ${filtros.anio}`);
+      if (filtros.accesibilidad) {
+        const et = filtros.accesibilidad === 'ALTA' ? 'acceso alto'
+                 : filtros.accesibilidad === 'MEDIA' ? 'acceso medio'
+                 : filtros.accesibilidad === 'BAJA / REMOTA' ? 'acceso remoto'
+                 : filtros.accesibilidad;
+        partes.push(et);
+      }
       return partes.join(' · ');
     }
 
@@ -1150,6 +1206,7 @@
       updateFireTable();
       updateTelegramPreview();
       actualizarContadores();
+      actualizarResumenPlan();
       initMap();
       renderCharts();
       actualizarBotonFiltro();
@@ -1236,13 +1293,21 @@
       refrescar();
     }
 
+    function aplicarFiltroAccesibilidad() {
+      filtros.accesibilidad = document.getElementById('filtroAccesibilidad').value;
+      refrescar();
+    }
+
     function limpiarFiltros() {
       filtroActivo = 'todo';
-      filtros = { desde: null, hasta: null, descripcion: 'todo el histórico', distrito: '', anio: '' };
+      filtros = { desde: null, hasta: null, descripcion: 'todo el histórico',
+                  distrito: '', anio: '', accesibilidad: '' };
       document.getElementById('filtroDia').value = '';
       document.getElementById('filtroSemana').value = '';
       document.getElementById('filtroDistrito').value = '';
       document.getElementById('filtroAnio').value = '';
+      const sa = document.getElementById('filtroAccesibilidad');
+      if (sa) sa.value = '';
       poblarFiltrosTemporales();
       refrescar();
     }
@@ -1938,6 +2003,242 @@
           ? `${fechas.length} días · ${total} focos · máximo ${maximo} en un día`
           : 'sin datos en la selección';
       }
+    }
+
+    // =====================================================================
+    // PLAN DE CAMPO: genera el Markdown de salida con los focos filtrados.
+    // Replica el formato de generar_matriz_campo.py para que ambos produzcan
+    // el mismo contenido con los mismos datos.
+    // =====================================================================
+
+    // Hora UTC (HHMM) -> hora local de Peru (UTC-5)
+    function horaLocalPeru(horaUtc) {
+      const s = String(horaUtc || '').trim().padStart(4, '0');
+      if (!/^\d{4}$/.test(s)) return '';
+      const hh = parseInt(s.slice(0, 2), 10);
+      const mm = s.slice(2);
+      return `${String((hh - 5 + 24) % 24).padStart(2, '0')}:${mm} hora local Peru`;
+    }
+
+    // Antigüedad en días respecto a la fecha más reciente cargada
+    function antiguedadDias(fechaTexto, fechaRef) {
+      const a = new Date(fechaTexto + 'T00:00:00Z');
+      const b = new Date(fechaRef + 'T00:00:00Z');
+      if (isNaN(a) || isNaN(b)) return null;
+      return Math.round((b - a) / 86400000);
+    }
+
+    const ORDEN_ACC = { 'ALTA': 0, 'MEDIA': 1, 'BAJA / REMOTA': 2 };
+
+    // Ordena y agrupa la selección igual que el script Python
+    function prepararPlan(registros) {
+      const ref = fechaMasReciente();
+      if (!ref) return null;
+
+      const conEdad = registros.map(r => Object.assign({}, r, {
+        _ant: antiguedadDias(r.acq_date, ref)
+      })).filter(r => r._ant !== null && r._ant >= 0);
+
+      conEdad.sort((a, b) => {
+        if (a._ant !== b._ant) return a._ant - b._ant;
+        const oa = ORDEN_ACC[a.accesibilidad] !== undefined ? ORDEN_ACC[a.accesibilidad] : 3;
+        const ob = ORDEN_ACC[b.accesibilidad] !== undefined ? ORDEN_ACC[b.accesibilidad] : 3;
+        if (oa !== ob) return oa - ob;
+        return (parseFloat(b.frp) || 0) - (parseFloat(a.frp) || 0);
+      });
+      return { ref: ref, focos: conEdad };
+    }
+
+    // Texto del resumen que se muestra antes de descargar
+    function actualizarResumenPlan() {
+      const cont = document.getElementById('plan-resumen');
+      const txt = document.getElementById('plan-resumen-texto');
+      if (!cont || !txt) return;
+
+      const datos = currentFires || [];
+      if (!datos.length) {
+        cont.classList.remove('hidden');
+        txt.innerHTML = 'No hay focos en la selección actual. Ajusta los filtros o pulsa ' +
+                        '<b>"Actualizar datos"</b> antes de generar el plan.';
+        return;
+      }
+
+      const prep = prepararPlan(datos);
+      if (!prep) { cont.classList.add('hidden'); return; }
+
+      const fechas = prep.focos.map(r => r.acq_date).sort();
+      const distritos = new Set(prep.focos.map(r => r.distrito)).size;
+      const acc = { 'ALTA': 0, 'MEDIA': 0, 'BAJA / REMOTA': 0 };
+      prep.focos.forEach(r => { if (acc[r.accesibilidad] !== undefined) acc[r.accesibilidad]++; });
+
+      cont.classList.remove('hidden');
+      txt.innerHTML =
+        `<b>El plan incluirá ${prep.focos.length} focos</b> ` +
+        `(${fechas[0]} a ${fechas[fechas.length - 1]}, ${distritos} distrito(s)).<br>` +
+        `Acceso: <b>${acc['ALTA']}</b> alto · <b>${acc['MEDIA']}</b> medio · ` +
+        `<b>${acc['BAJA / REMOTA']}</b> remoto.<br>` +
+        `<span class="text-slate-400">Se genera desde los focos que tienes filtrados arriba. ` +
+        `Si esperabas más, revisa los filtros o pulsa "Actualizar datos".</span>`;
+    }
+
+    function descargarPlanCampo() {
+      const datos = currentFires || [];
+      if (!datos.length) {
+        alert('No hay focos en la selección actual.\n\n' +
+              'Ajusta los filtros (por ejemplo, amplía el rango de fechas) ' +
+              'o pulsa "Actualizar datos" para traer los más recientes.');
+        return;
+      }
+
+      const prep = prepararPlan(datos);
+      if (!prep || !prep.focos.length) {
+        alert('No se pudo determinar la antigüedad de los focos. Revisa las fechas de los datos.');
+        return;
+      }
+
+      const hoy = new Date().toISOString().slice(0, 10);
+      const fechas = prep.focos.map(r => r.acq_date).sort();
+      const distritos = {};
+      const sensores = {};
+      const acc = { 'ALTA': 0, 'MEDIA': 0, 'BAJA / REMOTA': 0 };
+      prep.focos.forEach(r => {
+        distritos[r.distrito] = (distritos[r.distrito] || 0) + 1;
+        sensores[r.source_sensor] = (sensores[r.source_sensor] || 0) + 1;
+        if (acc[r.accesibilidad] !== undefined) acc[r.accesibilidad]++;
+      });
+
+      const frps = prep.focos.map(r => parseFloat(r.frp) || 0);
+      const md = [];
+
+      md.push('# Plan de Salida a Campo — Focos de Calor FIRMS');
+      md.push('**Proyecto:** Monitoreo de Quemas Agrícolas — Provincia de Leoncio Prado (Huánuco)  ');
+      md.push(`**Generado:** ${hoy} desde el dashboard (datos: ${fuenteDatos})  `);
+      md.push(`**Focos incluidos:** ${prep.focos.length}  `);
+      md.push(`**Rango de detección:** ${fechas[0]} a ${fechas[fechas.length - 1]}  `);
+      md.push(`**Filtros aplicados:** ${describirFiltros()}  `);
+      md.push('**Fuente de datos:** NASA FIRMS (MODIS + VIIRS NRT)');
+      md.push('');
+      md.push('> Generado desde el dashboard con los focos que tenías filtrados. Para el catálogo');
+      md.push('> completo y reproducible de la tesis, usar `generar_matriz_campo.py`.');
+      md.push('');
+      md.push('---');
+      md.push('');
+      md.push('## Resumen');
+      md.push('');
+      md.push(`* **Focos:** ${prep.focos.length} en ${new Set(fechas).size} día(s)`);
+      md.push(`* **Por sensor:** ` + Object.entries(sensores).map(([k, v]) => `${k}: ${v}`).join(', '));
+      md.push(`* **Accesibilidad:** ALTA ${acc['ALTA']} · MEDIA ${acc['MEDIA']} · ` +
+              `REMOTA ${acc['BAJA / REMOTA']}`);
+      md.push(`* **FRP máximo:** ${Math.max.apply(null, frps).toFixed(2)} MW | ` +
+              `**FRP medio:** ${(frps.reduce((a, b) => a + b, 0) / frps.length).toFixed(2)} MW`);
+      md.push('');
+      md.push('### Distribución por distrito');
+      md.push('');
+      md.push('| Distrito | Focos |');
+      md.push('| :--- | ---: |');
+      Object.entries(distritos).sort((a, b) => b[1] - a[1]).forEach(([d, n]) => {
+        md.push(`| ${d} | ${n} |`);
+      });
+      md.push('');
+      md.push('---');
+      md.push('');
+      md.push('## Focos por día de detección');
+      md.push('');
+
+      let contador = 0;
+      const porDia = {};
+      prep.focos.forEach(r => {
+        if (!porDia[r.acq_date]) porDia[r.acq_date] = [];
+        porDia[r.acq_date].push(r);
+      });
+
+      Object.keys(porDia).sort().forEach(fecha => {
+        const grupo = porDia[fecha];
+        const ant = grupo[0]._ant;
+        const etiqueta = ant === 0 ? 'hoy' : ant === 1 ? 'ayer' : `hace ${ant} días`;
+        md.push(`### ${fecha} — ${etiqueta} (${grupo.length} focos)`);
+        md.push('');
+        grupo.forEach(r => {
+          contador++;
+          const lat = parseFloat(r.latitude);
+          const lon = parseFloat(r.longitude);
+          md.push(`#### ${contador}. Foco (${r.distrito || 'sin distrito'})`);
+          md.push(`* **Distrito:** ${r.distrito || 'sin distrito'}`);
+          md.push(`* **Coordenadas:** \`${lat.toFixed(5)}, ${lon.toFixed(5)}\` — ` +
+                  `[Abrir en Google Maps](https://www.google.com/maps?q=${lat.toFixed(5)},${lon.toFixed(5)})`);
+          md.push(`* **Fecha y hora:** ${r.acq_date} | ${r.acq_time} UTC (${horaLocalPeru(r.acq_time)})`);
+          md.push(`* **Sensor:** ${r.source_sensor} | Confianza: **${r.confianza_cruda || r.confidence || 's/d'}**`);
+          md.push(`* **Potencia radiativa (FRP):** ${r.frp} MW`);
+          md.push(`* **Acceso:** ${r.carretera_cercana || 's/d'} a ${r.dist_carretera_km || '?'} km ` +
+                  `(${r.accesibilidad || 's/d'}) | Costo estimado: ${r.costo_estimado_pen || 's/d'}`);
+          md.push(`* **Clima 24 h:** ${r.alerta_clima_campo || 'sin dato'}`);
+          if (r.tipo_registro === 'baja_confianza') {
+            md.push('* **Aviso:** detección de baja confianza. Verificar en campo antes de usarla como evidencia.');
+          }
+          md.push(`* **Navegación:** ${r.google_maps_url || ''}`);
+          md.push('');
+        });
+      });
+
+      md.push('---');
+      md.push('');
+      md.push('## Ficha de registro de campo');
+      md.push('');
+      md.push('Imprime una ficha por foco visitado.');
+      md.push('');
+      md.push('```');
+      md.push('FICHA DE VERIFICACION DE QUEMA EN CAMPO (GROUND TRUTHING)');
+      md.push('='.repeat(70));
+      md.push('N° de Foco / ID: ______________    Fecha de Visita: ___/___/______');
+      md.push('Distrito: _____________________    Hora de Visita:  ___:___ AM/PM');
+      md.push('Coordenadas GPS satelite: Lat: ____________  Lon: ____________');
+      md.push('Coordenadas GPS campo:    Lat: ____________  Lon: ____________');
+      md.push('');
+      md.push('1. ESTADO ACTUAL DEL EVENTO:');
+      md.push('   [ ] Fuego activo   [ ] Humo/brasas   [ ] Ceniza fresca');
+      md.push('   [ ] Suelo lixiviado   [ ] Sin evidencia (posible falso positivo)');
+      md.push('');
+      md.push('2. COBERTURA AFECTADA:');
+      md.push('   [ ] Purma   [ ] Bosque primario   [ ] Pastizal');
+      md.push('   [ ] Rastrojo (cacao/cafe/platano/maiz)   [ ] Residuos de tala');
+      md.push('');
+      md.push('3. SEVERIDAD: [ ] Baja  [ ] Moderada  [ ] Alta');
+      md.push('');
+      md.push('4. AREA QUEMADA: __________ m2  o  __________ ha');
+      md.push('   Pendiente: [ ] Plano  [ ] Ondulado  [ ] Escarpado');
+      md.push('');
+      md.push('5. CAUSA APARENTE:');
+      md.push('   [ ] Chacra nueva   [ ] Limpieza de cultivo   [ ] Pasturas');
+      md.push('   [ ] Basura   [ ] Incendio fuera de control');
+      md.push('');
+      md.push('6. FOTOS: Norte ____  Sur ____  Ceniza ____  Limite ____');
+      md.push('');
+      md.push('7. NOTAS:');
+      md.push('   ' + '_'.repeat(66));
+      md.push('   ' + '_'.repeat(66));
+      md.push('```');
+      md.push('');
+      md.push('---');
+      md.push('');
+      md.push('## Notas metodológicas');
+      md.push('');
+      md.push('1. En selva alta la evidencia se degrada rápido: 0-48 h ceniza fresca; 3-7 días la');
+      md.push('   lluvia lixivia; más de 7 días el perímetro se vuelve difuso.');
+      md.push('2. `dist_carretera_km`, `tiempo_estimado` y `costo_estimado_pen` son estimaciones');
+      md.push('   calculadas, no mediciones de campo.');
+      md.push('3. La red vial proviene de OpenStreetMap y el límite provincial del shapefile oficial.');
+
+      const contenido = md.join('\n');
+      const blob = new Blob([contenido], { type: 'text/markdown;charset=utf-8' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `plan_campo_${hoy.replace(/-/g, '')}.md`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      appendLog(`[Plan] Generado plan de campo con ${prep.focos.length} focos ` +
+                `(${fechas[0]} a ${fechas[fechas.length - 1]}).`, 'text-emerald-400 font-bold');
     }
 
     // Descarga CSV: exporta el histórico completo que está cargado

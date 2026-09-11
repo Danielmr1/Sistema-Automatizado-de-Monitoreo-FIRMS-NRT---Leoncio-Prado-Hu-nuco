@@ -52,9 +52,10 @@ respaldado contra la respuesta de NASA.
 ### Documentos y visor
 | Archivo | Función |
 |---|---|
-| `index.html` | Dashboard **de solo visualización**: panel de estado, mapa, mapa de calor, filtros por fecha/distrito/año, gráficos, descargas y botón "Actualizar datos". |
-| `EVENTOS_QUEMAS_CAMPO_TESIS.md` | Matriz de salidas a campo (generada, no editada a mano). |
-| `README.md`, `GUIA_CONFIGURACION_Y_CAMPO.md` | Documentación. |
+| `index.html` | Dashboard **de solo visualización**: panel de estado, mapa, mapa de calor, filtros (fecha, distrito, año, accesibilidad), gráficos, descargas y botones "Actualizar datos" y "Descargar plan de campo". |
+| `EVENTOS_QUEMAS_CAMPO_TESIS.md` | Catálogo de la temporada (30 días). Generado, no editado a mano. |
+| `GUIA_EJECUCION_LOCAL.md` | Cómo ejecutar todo en PowerShell, con los errores frecuentes. |
+| `README.md`, `GUIA_CONFIGURACION_Y_CAMPO.md` | Documentación general y de despliegue. |
 
 ### Cómo se actualiza el dashboard
 
@@ -64,6 +65,8 @@ El dashboard **no ejecuta nada**: solo muestra lo que el workflow ya recogió.
 * **Botón "Actualizar datos"**: descarga el histórico más reciente desde GitHub. Es manual
   a propósito, para no consumir datos móviles sin que el usuario lo pida.
 * **Botón "Cargar histórico"**: abre un CSV de tu equipo, útil sin conexión.
+* **Botón "Descargar plan de campo"**: genera el plan de salida a campo respetando los filtros
+  activos (incluida la accesibilidad). Alternativa al script `generar_matriz_campo.py`.
 * **Sin internet**: sigue funcionando con los datos incrustados.
 
 Si el dashboard no incluye todos los eventos del histórico, muestra un aviso indicando

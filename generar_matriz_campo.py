@@ -96,7 +96,8 @@ def formatear_foco(idx, fila, es_ultimo_del_grupo):
 def main():
     parser = argparse.ArgumentParser(description="Genera la matriz de campo desde el histórico verificado")
     parser.add_argument("--historico", default=HIST_PATH)
-    parser.add_argument("--salida", default=OUT_PATH)
+    parser.add_argument("--salida", default=None,
+                        help="Archivo de salida. Por defecto: el catálogo completo, salvo con --plan.")
     parser.add_argument("--dias", type=int, default=30,
                         help="Antiguedad maxima de las detecciones a incluir. Por defecto 30.")
     parser.add_argument("--solo-accesibles", action="store_true",
@@ -105,7 +106,23 @@ def main():
                         help="Fecha de referencia YYYY-MM-DD (por defecto, hoy).")
     parser.add_argument("--top", type=int, default=0,
                         help="Limitar a los N focos de mayor FRP dentro de cada grupo (0 = sin limite).")
+    parser.add_argument("--plan", action="store_true",
+                        help="Modo plan de viaje: escribe en plan_campo_<fecha>.md en lugar de "
+                             "sobrescribir el catálogo EVENTOS_QUEMAS_CAMPO_TESIS.md")
     args = parser.parse_args()
+
+    # Resolver el archivo de salida.
+    # El catálogo (ventana larga) y el plan de viaje (ventana corta) son documentos
+    # distintos: no deben sobrescribirse entre sí.
+    if args.salida:
+        destino = args.salida
+    elif args.plan or args.dias <= 7 or args.solo_accesibles:
+        hoy = datetime.datetime.now(datetime.timezone.utc).strftime("%Y%m%d")
+        destino = f"plan_campo_{hoy}.md"
+        print(f"[Matriz] Modo plan de viaje: se escribira en {destino}")
+        print(f"[Matriz] El catalogo {OUT_PATH} no se toca.")
+    else:
+        destino = OUT_PATH
 
     df = cargar_historico(args.historico)
     print(f"[Matriz] Histórico: {len(df)} registros desde {args.historico}")
@@ -286,15 +303,15 @@ def main():
 
     contenido = "\n".join(md)
 
-    if os.path.exists(args.salida):
-        respaldo = f"{args.salida}.bak_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
-        os.replace(args.salida, respaldo)
+    if os.path.exists(destino):
+        respaldo = f"{destino}.bak_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
+        os.replace(destino, respaldo)
         print(f"[Respaldo] El documento anterior se guardó en {respaldo}")
 
-    with open(args.salida, "w", encoding="utf-8") as f:
+    with open(destino, "w", encoding="utf-8") as f:
         f.write(contenido)
 
-    print(f"[Matriz] Documento generado: {args.salida}")
+    print(f"[Matriz] Documento generado: {destino}")
     print(f"[Matriz] {len(seleccion)} focos | {seleccion['acq_date'].nunique()} días | "
           f"{len(por_distrito)} distrito(s)")
 
