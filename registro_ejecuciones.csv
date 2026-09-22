@@ -23,3 +23,4 @@
 2026-09-19,15:15:40,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,0,0,0,0,0,sin_datos_fuente,"La API FIRMS no devolvió registros (revisar conectividad, MAP_KEY o rango de días)"
 2026-09-20,15:21:00,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,58,34,34,0,0,ok,34 focos guardados en histórico
 2026-09-21,17:46:39,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,106,60,56,4,0,ok,60 focos guardados en histórico
+2026-09-22,16:10:53,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,191,62,57,5,0,ok,62 focos guardados en histórico
