@@ -34,3 +34,4 @@
 2026-09-30,17:31:20,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,41,7,7,0,0,ok,7 focos guardados en histórico
 2026-10-01,17:56:16,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,0,0,0,0,0,sin_datos_fuente,"La API FIRMS no devolvió registros (revisar conectividad, MAP_KEY o rango de días)"
 2026-10-02,17:21:39,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,4,0,0,0,0,sin_focos_en_aoi,"4 detecciones en el BBOX, 0 dentro de Leoncio Prado"
+2026-10-03,15:38:18,2,,MODIS_NRT|VIIRS_SNPP_NRT|VIIRS_NOAA20_NRT,0,0,0,0,0,sin_datos_fuente,"La API FIRMS no devolvió registros (revisar conectividad, MAP_KEY o rango de días)"
